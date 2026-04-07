@@ -1,0 +1,163 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: userId
+    // Fields:
+    //   - uid: string (required)
+    //   - displayName: string
+    //   - email: string (required)
+    //   - photoURL: string
+    //   - role: string (enum: user, admin)
+    //
+    // Collection: items
+    // Document ID: itemId
+    // Fields:
+    //   - id: string
+    //   - title: string (required)
+    //   - description: string
+    //   - price: number
+    //   - currentBid: number
+    //   - bidCount: int
+    //   - listingType: string (enum: auction, buy-now)
+    //   - images: list of strings
+    //   - sellerUid: string (required)
+    //   - sellerName: string
+    //   - buyerUid: string
+    //   - endTime: timestamp
+    //   - createdAt: timestamp
+    //   - status: string (enum: active, sold, ended)
+    //
+    // Collection: items/{itemId}/bids
+    // Document ID: bidId
+    // Fields:
+    //   - id: string
+    //   - itemId: string (required)
+    //   - bidderUid: string (required)
+    //   - bidderName: string
+    //   - amount: number (required)
+    //   - timestamp: timestamp (required)
+    //
+    // Collection: items/{itemId}/reviews
+    // Document ID: reviewId
+    // Fields:
+    //   - id: string
+    //   - itemId: string (required)
+    //   - reviewerUid: string (required)
+    //   - reviewerName: string
+    //   - authenticityRating: int (1-5)
+    //   - conditionRating: int (1-5)
+    //   - sellerExperienceRating: int (1-5)
+    //   - comment: string
+    //   - timestamp: timestamp (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        (request.auth.token.email == "smubasshir532@gmail.com" && request.auth.token.email_verified == true)
+      );
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email']) &&
+             data.uid is string &&
+             data.email is string &&
+             (!('role' in data) || data.role in ['user', 'admin']) &&
+             (!('bio' in data) || (data.bio is string && data.bio.size() < 2000)) &&
+             (!('preferredCategories' in data) || (data.preferredCategories is list && data.preferredCategories.size() <= 10)) &&
+             (!('externalCollectionUrl' in data) || (data.externalCollectionUrl is string && data.externalCollectionUrl.size() < 500));
+    }
+
+    function isValidItem(data) {
+      return data.keys().hasAll(['title', 'listingType', 'sellerUid', 'status']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.listingType in ['auction', 'buy-now'] &&
+             data.sellerUid is string &&
+             data.status in ['active', 'sold', 'ended'] &&
+             (!('buyerUid' in data) || data.buyerUid is string);
+    }
+
+    function isValidBid(data) {
+      return data.keys().hasAll(['itemId', 'bidderUid', 'amount', 'timestamp']) &&
+             data.itemId is string &&
+             data.bidderUid is string &&
+             data.amount is number && data.amount > 0 &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidReview(data) {
+      return data.keys().hasAll(['itemId', 'reviewerUid', 'authenticityRating', 'conditionRating', 'sellerExperienceRating', 'timestamp']) &&
+             data.itemId is string &&
+             data.reviewerUid is string &&
+             data.authenticityRating is int && data.authenticityRating >= 1 && data.authenticityRating <= 5 &&
+             data.conditionRating is int && data.conditionRating >= 1 && data.conditionRating <= 5 &&
+             data.sellerExperienceRating is int && data.sellerExperienceRating >= 1 && data.sellerExperienceRating <= 5 &&
+             (!('comment' in data) || (data.comment is string && data.comment.size() < 1000)) &&
+             data.timestamp is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.role == 'user';
+      allow update: if (isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.role == resource.data.role) || isAdmin();
+    }
+
+    match /items/{itemId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidItem(request.resource.data) && request.resource.data.sellerUid == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        (resource.data.sellerUid == request.auth.uid && isValidItem(request.resource.data)) ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['currentBid', 'bidCount'])) ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'buyerUid']) && request.resource.data.status == 'sold' && request.resource.data.buyerUid == request.auth.uid) ||
+        isAdmin()
+      );
+      allow delete: if isAdmin() || (isAuthenticated() && resource.data.sellerUid == request.auth.uid && resource.data.bidCount == 0);
+
+      match /bids/{bidId} {
+        allow read: if true;
+        allow create: if isAuthenticated() && isValidBid(request.resource.data) && 
+                      request.resource.data.bidderUid == request.auth.uid &&
+                      get(/databases/$(database)/documents/items/$(itemId)).data.status == 'active' &&
+                      request.resource.data.amount > get(/databases/$(database)/documents/items/$(itemId)).data.currentBid;
+      }
+
+      match /reviews/{reviewId} {
+        allow read: if true;
+        allow create: if isAuthenticated() && isValidReview(request.resource.data) &&
+                      request.resource.data.reviewerUid == request.auth.uid &&
+                      get(/databases/$(database)/documents/items/$(itemId)).data.status == 'sold' &&
+                      get(/databases/$(database)/documents/items/$(itemId)).data.buyerUid == request.auth.uid;
+      }
+    }
+
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /test/{docId} {
+      allow read: if true;
+    }
+  }
+}

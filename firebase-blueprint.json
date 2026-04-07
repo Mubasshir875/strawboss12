@@ -1,0 +1,98 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "bio": { "type": "string" },
+        "preferredCategories": { "type": "array", "items": { "type": "string" } },
+        "externalCollectionUrl": { "type": "string", "format": "uri" }
+      },
+      "required": ["uid", "email"]
+    },
+    "AuctionItem": {
+      "title": "Auction Item",
+      "description": "An item listed for auction or direct sale",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "currentBid": { "type": "number" },
+        "bidCount": { "type": "integer" },
+        "listingType": { "type": "string", "enum": ["auction", "buy-now"] },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "sellerUid": { "type": "string" },
+        "sellerName": { "type": "string" },
+        "buyerUid": { "type": "string" },
+        "lastBidderUid": { "type": "string" },
+        "endTime": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["active", "sold", "ended"] },
+        "shippingStatus": { "type": "string", "enum": ["pending", "shipped", "delivered"] },
+        "endingSoonEmailSent": { "type": "boolean" }
+      },
+      "required": ["title", "listingType", "sellerUid", "status"]
+    },
+    "Bid": {
+      "title": "Bid",
+      "description": "A bid placed on an auction item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "itemId": { "type": "string" },
+        "bidderUid": { "type": "string" },
+        "bidderName": { "type": "string" },
+        "amount": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["itemId", "bidderUid", "amount", "timestamp"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "A review for an acquired artifact",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "itemId": { "type": "string" },
+        "reviewerUid": { "type": "string" },
+        "reviewerName": { "type": "string" },
+        "authenticityRating": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "conditionRating": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "sellerExperienceRating": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "comment": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["itemId", "reviewerUid", "authenticityRating", "conditionRating", "sellerExperienceRating", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles"
+    },
+    "/items/{itemId}": {
+      "schema": "AuctionItem",
+      "description": "Auction and sale items"
+    },
+    "/items/{itemId}/bids/{bidId}": {
+      "schema": "Bid",
+      "description": "Bid history for an item"
+    },
+    "/items/{itemId}/reviews/{reviewId}": {
+      "schema": "Review",
+      "description": "Reviews for an item"
+    },
+    "/users/{userId}/watchlist/{itemId}": {
+      "schema": "AuctionItem",
+      "description": "User's watchlist items"
+    }
+  }
+}
