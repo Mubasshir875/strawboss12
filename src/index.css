@@ -7,16 +7,16 @@
   --font-display: "Space Grotesk", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  --color-primary: #2563eb; /* Modern Blue */
-  --color-accent: #3b82f6;  /* Lighter Blue */
-  --color-ink: #111827;     /* Dark Gray/Black for text */
-  --color-paper: #f9fafb;   /* Very Light Gray Background */
+  --color-primary: #000000; /* Pure Black */
+  --color-accent: #000000;  /* Pure Black */
+  --color-ink: #000000;     /* Pure Black for text */
+  --color-paper: #ffffff;   /* Pure White Background */
   --color-surface: #ffffff; /* White Surface */
 }
 
 @layer base {
   body {
-    @apply bg-paper text-ink font-sans antialiased selection:bg-primary selection:text-white;
+    @apply bg-paper text-ink font-sans antialiased selection:bg-black selection:text-white;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -26,15 +26,15 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-primary text-white px-8 py-4 font-bold text-sm transition-all duration-300 hover:bg-accent hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:pointer-events-none rounded-xl;
+    @apply bg-black text-white px-8 py-4 font-bold text-sm transition-all duration-300 hover:bg-zinc-800 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:pointer-events-none rounded-none uppercase tracking-[0.2em];
   }
 
   .btn-outline {
-    @apply border border-gray-200 px-8 py-4 font-bold text-sm transition-all duration-300 hover:border-primary hover:text-primary active:scale-95 rounded-xl;
+    @apply border border-black px-8 py-4 font-bold text-sm transition-all duration-300 hover:bg-black hover:text-white active:scale-95 rounded-none uppercase tracking-[0.2em];
   }
 
   .input-field {
-    @apply w-full bg-gray-50 border border-gray-100 py-4 px-6 outline-none focus:border-primary focus:bg-white transition-all duration-300 placeholder:text-gray-400 rounded-xl text-base;
+    @apply w-full bg-white border-b border-black/10 py-4 px-0 outline-none focus:border-black transition-all duration-300 placeholder:text-zinc-400 rounded-none text-base;
   }
 
   .glass {

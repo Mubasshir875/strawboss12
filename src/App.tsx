@@ -54,7 +54,7 @@ import {
   Info,
   Sparkles
 } from 'lucide-react';
-import { generateArtifactDescription } from './lib/gemini';
+import { generateItemDescription } from './lib/gemini';
 import { formatDistanceToNow, format } from 'date-fns';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -76,7 +76,7 @@ interface AuctionItem {
   endTime?: Timestamp;
   createdAt: Timestamp;
   status: 'active' | 'sold' | 'ended';
-  category: 'Jewelry' | 'Furniture' | 'Art' | 'Manuscripts' | 'Textiles' | 'Other';
+  category: 'Fine Art' | 'Timepieces' | 'Furniture' | 'Jewelry' | 'Manuscripts' | 'Other';
   lastBidderUid?: string;
   shippingStatus?: 'pending' | 'shipped' | 'delivered';
   endingSoonEmailSent?: boolean;
@@ -293,7 +293,7 @@ const ReviewModal = ({
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-surface w-full max-w-lg rounded-[2rem] md:rounded-[3rem] shadow-[0_80px_160px_rgba(0,0,0,0.5)] overflow-hidden p-8 md:p-12 space-y-8 md:space-y-12 border border-primary/5"
+        className="bg-surface w-full max-w-lg rounded-[2rem] md:rounded-[3rem] shadow-[0_80px_160px_rgba(0,0,0,0.5)] overflow-y-auto max-h-[90vh] p-8 md:p-12 space-y-8 md:space-y-12 border border-primary/5"
       >
         <div className="flex justify-between items-center border-b border-primary/5 pb-6 md:pb-8">
           <div className="space-y-1">
@@ -360,7 +360,7 @@ const MembershipModal = ({ onCancel, onSubmit }: { onCancel: () => void, onSubmi
     name: '',
     email: '',
     collectionSize: '1-10',
-    interest: 'Jewelry',
+    interest: 'Streetwear',
     message: ''
   });
 
@@ -419,9 +419,9 @@ const MembershipModal = ({ onCancel, onSubmit }: { onCancel: () => void, onSubmi
                 value={formData.collectionSize}
                 onChange={e => setFormData({...formData, collectionSize: e.target.value})}
               >
-                <option value="1-10">1-10 Artifacts</option>
-                <option value="11-50">11-50 Artifacts</option>
-                <option value="50+">50+ Artifacts</option>
+                <option value="1-10">1-10 Items</option>
+                <option value="11-50">11-50 Items</option>
+                <option value="50+">50+ Items</option>
               </select>
             </div>
             <div className="space-y-3">
@@ -431,9 +431,10 @@ const MembershipModal = ({ onCancel, onSubmit }: { onCancel: () => void, onSubmi
                 value={formData.interest}
                 onChange={e => setFormData({...formData, interest: e.target.value})}
               >
-                <option value="Jewelry">Jewelry</option>
+                <option value="Fine Art">Fine Art</option>
+                <option value="Timepieces">Timepieces</option>
                 <option value="Furniture">Furniture</option>
-                <option value="Art">Fine Art</option>
+                <option value="Jewelry">Jewelry</option>
                 <option value="Manuscripts">Manuscripts</option>
               </select>
             </div>
@@ -636,31 +637,78 @@ const Navbar = ({
     <motion.header 
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className="fixed top-0 left-0 right-0 z-[100] bg-white border-b border-gray-100"
+      className="fixed top-0 left-0 right-0 z-[100] bg-white border-b border-black/5"
     >
-      <nav className="max-w-[1800px] mx-auto px-6 md:px-12 h-20 md:h-24 flex items-center justify-between">
+      {/* Top Announcement Bar */}
+      <div className="bg-black text-white py-2 px-6 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] flex justify-between items-center">
+        <span>Est. 1924 | Premier Auction House</span>
+        <span className="hidden md:block">Worldwide White-Glove Delivery</span>
+        <span className="md:hidden">White-Glove Delivery</span>
+      </div>
+
+      <nav className="max-w-[1800px] mx-auto px-6 md:px-12 h-16 md:h-20 flex items-center justify-between">
+        {/* Live Bidding Ticker */}
+        <div className="absolute top-full left-0 right-0 bg-accent text-white py-1 overflow-hidden z-[-1]">
+          <div className="animate-marquee whitespace-nowrap flex items-center gap-12 text-[10px] font-black uppercase tracking-[0.2em]">
+            {[
+              "Live: 18th Century French Rococo Armchair - Current Bid: $12,500",
+              "Upcoming: Imperial Ming Dynasty Vase - Starts in 2h 15m",
+              "Sold: 1952 Patek Philippe Perpetual Calendar - Final Price: $245,000",
+              "Live: Rare Blue Diamond Pendant - Current Bid: $85,000",
+              "Upcoming: Original Manuscript by Leonardo da Vinci - Starts in 5h 30m"
+            ].map((text, i) => (
+              <span key={i} className="flex items-center gap-4">
+                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                {text}
+              </span>
+            ))}
+            {/* Duplicate for seamless loop */}
+            {[
+              "Live: 18th Century French Rococo Armchair - Current Bid: $12,500",
+              "Upcoming: Imperial Ming Dynasty Vase - Starts in 2h 15m",
+              "Sold: 1952 Patek Philippe Perpetual Calendar - Final Price: $245,000",
+              "Live: Rare Blue Diamond Pendant - Current Bid: $85,000",
+              "Upcoming: Original Manuscript by Leonardo da Vinci - Starts in 5h 30m"
+            ].map((text, i) => (
+              <span key={i + 10} className="flex items-center gap-4">
+                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                {text}
+              </span>
+            ))}
+          </div>
+        </div>
+
         <div className="flex items-center gap-12">
           <div 
             className="flex items-center gap-4 cursor-pointer group"
             onClick={() => setView('home')}
           >
-            <div className="flex flex-col">
-              <h1 className="text-xl md:text-2xl font-bold tracking-tighter uppercase leading-none text-ink">Strawboss</h1>
-              <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-gray-400 font-bold">Fashion Marketplace</p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-[#e11d48] rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500">
+                <span className="text-white font-black text-xl md:text-2xl">K</span>
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-xl md:text-2xl font-black tracking-tighter uppercase leading-none text-black">Strawboss</h1>
+                <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-zinc-400 font-bold">Elite Auctions</p>
+              </div>
             </div>
           </div>
           
-          <div className="hidden lg:flex items-center gap-8 text-sm font-bold uppercase tracking-widest text-gray-500">
+          <div className="hidden lg:flex items-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
             {[
-              { name: 'Shop', view: 'marketplace' },
-              { name: 'Sell', view: 'sell' }
+              { name: 'Antiques', view: 'marketplace' },
+              { name: 'Collection', view: 'marketplace' },
+              { name: 'Live Auctions', view: 'marketplace' },
+              { name: 'Consign', view: 'sell' },
+              { name: 'Catalogues', view: 'marketplace' },
+              { name: 'New Acquisitions', view: 'marketplace' }
             ].map((item) => (
               <button 
                 key={item.name}
                 onClick={() => setView(item.view)}
                 className={cn(
-                  "hover:text-primary transition-all duration-300 relative group py-2",
-                  view === item.view && "text-primary"
+                  "hover:text-black transition-all duration-300 relative group py-2 whitespace-nowrap",
+                  view === item.view && "text-black border-b border-black"
                 )}
               >
                 {item.name}
@@ -669,12 +717,25 @@ const Navbar = ({
           </div>
         </div>
 
+        <div className="hidden xl:flex items-center flex-1 max-w-md mx-12">
+          <div className="relative w-full group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-black transition-colors" />
+            <input 
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Search catalog..."
+              className="w-full bg-zinc-50 border border-black/5 rounded-full py-2 pl-12 pr-4 text-xs font-bold tracking-widest outline-none focus:bg-white focus:border-black/20 transition-all"
+            />
+          </div>
+        </div>
+
         <div className="flex items-center gap-4 md:gap-8">
           <button 
             onClick={() => setView('dashboard')}
-            className="p-2 text-gray-400 hover:text-primary transition-all duration-300 relative group"
+            className="p-2 text-zinc-400 hover:text-black transition-all duration-300 relative group"
           >
-            <Heart className={cn("w-5 h-5", favoritesCount > 0 && "fill-primary text-primary")} />
+            <Heart className={cn("w-5 h-5", favoritesCount > 0 && "fill-black text-black")} />
           </button>
 
           {user ? (
@@ -683,36 +744,36 @@ const Navbar = ({
                 onClick={() => setView('dashboard')}
                 className="flex items-center gap-3 group"
               >
-                <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-100">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden border border-black/5">
                   <img 
                     src={userProfile?.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.uid} 
                     alt="Profile" 
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <span className="hidden md:block text-sm font-bold text-gray-500 group-hover:text-primary transition-colors">
+                <span className="hidden md:block text-xs font-bold text-zinc-500 group-hover:text-black transition-colors uppercase tracking-widest">
                   {userProfile?.displayName?.split(' ')[0] || 'User'}
                 </span>
               </button>
               <button 
                 onClick={onSignOut}
-                className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-primary transition-all duration-300 border border-gray-200 px-4 py-2 rounded-lg"
+                className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-black transition-all duration-300 border border-black/10 px-4 py-2"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-3 h-3" />
                 <span>Sign Out</span>
               </button>
             </div>
           ) : (
             <button 
               onClick={onSignIn}
-              className="bg-primary text-white px-8 py-3 rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-accent transition-all duration-300 shadow-lg shadow-primary/10"
+              className="btn-primary !py-3 !px-6 !text-xs"
             >
               Access
             </button>
           )}
 
           <button 
-            className="lg:hidden p-2 text-ink hover:text-primary transition-colors"
+            className="lg:hidden p-2 text-black hover:text-zinc-600 transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -728,9 +789,25 @@ const Navbar = ({
             exit={{ opacity: 0, y: -20 }}
             className="lg:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-100 shadow-2xl p-8 space-y-6 z-50"
           >
+            <div className="pt-4 pb-2">
+              <div className="relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                <input 
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="Search catalog..."
+                  className="w-full bg-zinc-50 border border-black/5 rounded-full py-3 pl-12 pr-4 text-xs font-bold tracking-widest outline-none focus:bg-white focus:border-black/20 transition-all"
+                />
+              </div>
+            </div>
             {[
-              { name: 'Shop', view: 'marketplace' },
-              { name: 'Sell', view: 'sell' },
+              { name: 'Antiques', view: 'marketplace' },
+              { name: 'Collection', view: 'marketplace' },
+              { name: 'Live Auctions', view: 'marketplace' },
+              { name: 'Consign', view: 'sell' },
+              { name: 'Catalogues', view: 'marketplace' },
+              { name: 'New Acquisitions', view: 'marketplace' },
               ...(user ? [{ name: 'My Profile', view: 'dashboard' }] : [])
             ].map((item) => (
               <button 
@@ -739,7 +816,7 @@ const Navbar = ({
                   setView(item.view);
                   setIsMobileMenuOpen(false);
                 }}
-                className="block w-full text-left text-lg font-bold text-gray-500 hover:text-primary transition-all duration-300"
+                className="block w-full text-left text-sm font-black uppercase tracking-widest text-gray-500 hover:text-primary transition-all duration-300"
               >
                 {item.name}
               </button>
@@ -751,175 +828,339 @@ const Navbar = ({
   );
 };
 
-const Hero = ({ onExplore, onConsign, featuredImageUrl, loading }: { onExplore: () => void, onConsign: () => void, featuredImageUrl: string, loading?: boolean }) => (
-  <section className="relative min-h-screen bg-paper overflow-hidden flex items-center">
-    {/* Background Image with Skeleton */}
-    <div className="absolute inset-0 z-0">
-      {loading ? (
-        <Skeleton className="w-full h-full rounded-none opacity-10" />
-      ) : (
-        <LazyImage 
-          src={featuredImageUrl} 
-          alt="Hero Background" 
-          className="w-full h-full object-cover opacity-[0.08] scale-110 blur-[1px]"
-        />
-      )}
-    </div>
-    {/* Background Pattern */}
-    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, var(--color-primary) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
-    
-      <div className="max-w-[1800px] mx-auto px-6 md:px-12 w-full flex flex-col items-center justify-center text-center pt-32 md:pt-40 pb-24 md:pb-32">
-      <motion.div 
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 max-w-2xl"
-      >
-        <div className="space-y-6 md:space-y-12">
-          <div className="space-y-3 md:space-y-4">
-            <span className="text-primary text-xs md:text-base font-black tracking-[0.6em] uppercase block">The Strawboss Standard</span>
-            <h2 className="text-4xl md:text-5xl font-serif font-black text-ink leading-tight tracking-tighter uppercase">
+const Hero = ({ onExplore, onConsign, featuredImageUrl, loading }: { onExplore: () => void, onConsign: () => void, featuredImageUrl: string, loading?: boolean }) => {
+  const [rotate, setRotate] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = (y - centerY) / 20;
+    const rotateY = (centerX - x) / 20;
+    setRotate({ x: rotateX, y: rotateY });
+  };
+
+  const handleMouseLeave = () => {
+    setRotate({ x: 0, y: 0 });
+  };
+
+  return (
+    <section className="relative min-h-screen bg-paper overflow-hidden flex items-center">
+      {/* Background Image with Skeleton */}
+      <div className="absolute inset-0 z-0">
+        {loading ? (
+          <Skeleton className="w-full h-full rounded-none opacity-10" />
+        ) : (
+          <LazyImage 
+            src={featuredImageUrl} 
+            alt="Hero Background" 
+            className="w-full h-full object-cover opacity-[0.08] scale-110 blur-[1px]"
+          />
+        )}
+      </div>
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, var(--color-primary) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+      
+      <div className="max-w-[1800px] mx-auto px-6 md:px-12 w-full grid lg:grid-cols-2 gap-20 items-center pt-32 md:pt-40 pb-24 md:pb-32 relative z-10">
+        <motion.div 
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+          className="text-left space-y-12"
+        >
+          <div className="space-y-6 max-w-full">
+            <div className="flex items-center gap-4">
+              <span className="w-12 h-[1px] bg-accent" />
+              <span className="text-accent text-xs md:text-base font-black tracking-[0.6em] uppercase">Private Treaty & Consignment Services</span>
+            </div>
+            <h2 className="text-3xl md:text-7xl font-serif font-black text-ink leading-none tracking-tighter uppercase break-words">
               STRAWBOSS <br />
-              ARCHIVES
+              <span className="italic font-extralight text-ink/40 lowercase">premier</span> AUCTION
             </h2>
+            <p className="text-lg md:text-2xl font-serif italic text-ink/80 max-w-xl leading-relaxed">
+              Established 1924. The global standard for authenticated elite auctions and private treaties. Acquire the world's most significant artifacts through our secure, high-stakes digital platform.
+            </p>
           </div>
 
-          <p className="text-lg md:text-2xl font-serif italic text-ink/80 max-w-2xl mx-auto leading-relaxed px-4">
-            Our experts traverse the globe to source artifacts of exceptional historical significance and aesthetic brilliance.
-          </p>
-
-          <div className="flex justify-center gap-8 md:gap-20">
-            <div className="space-y-1 md:space-y-2">
-              <span className="text-2xl md:text-3xl font-serif font-black text-ink">98%</span>
-              <p className="text-[10px] md:text-base uppercase tracking-widest font-black text-ink/60">Authentication</p>
-            </div>
-            <div className="space-y-1 md:space-y-2">
-              <span className="text-2xl md:text-3xl font-serif font-black text-ink">12k+</span>
-              <p className="text-[10px] md:text-base uppercase tracking-widest font-black text-ink/60">Elite Members</p>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 md:gap-10 pt-8">
+          <div className="flex flex-col sm:flex-row items-center gap-6 md:gap-10">
             <motion.button 
               whileHover={{ scale: 1.05, y: -5 }}
               whileTap={{ scale: 0.95 }}
               onClick={onExplore}
-              className="w-full sm:w-auto bg-primary text-white px-12 md:px-16 py-5 md:py-6 text-base font-black tracking-[0.5em] uppercase hover:bg-ink transition-all duration-700 shadow-[0_40px_80px_rgba(0,31,63,0.2)]"
+              className="w-full sm:w-auto bg-primary text-white px-12 md:px-16 py-5 md:py-6 text-base font-black tracking-[0.5em] uppercase hover:bg-ink transition-all duration-700 shadow-[0_40px_80px_rgba(0,0,0,0.2)]"
             >
-              Explore Archives
+              Enter Gallery
             </motion.button>
             <button 
               onClick={onConsign}
               className="group flex items-center gap-4 text-base font-black uppercase tracking-[0.4em] text-ink/60 hover:text-ink transition-all duration-500"
             >
-              Consign Artifact
+              Consign Piece
               <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
             </button>
           </div>
-        </div>
-      </motion.div>
-    </div>
-  </section>
-);
 
-const ItemCard = ({ item, onClick, isFavorite, onToggleFavorite }: { item: AuctionItem, onClick: () => void, isFavorite: boolean, onToggleFavorite: (e: React.MouseEvent) => void }) => (
-  <motion.div 
-    layout
-    initial={{ opacity: 0, y: 40 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    whileHover={{ y: -12, scale: 1.03 }}
-    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-    className="group bg-surface border border-primary/5 overflow-hidden cursor-pointer shadow-sm hover:shadow-[0_80px_160px_rgba(0,0,0,0.5)] transition-all duration-500 rounded-[2rem]"
-    onClick={onClick}
-  >
-    <div className="relative aspect-[3/4] overflow-hidden">
-      <LazyImage 
-        src={item.images[0] || `https://picsum.photos/seed/antique-${item.id}/800/1000`} 
-        alt={item.title}
-        imgClassName="img-fit group-hover:scale-110 transition-transform duration-[1.5s] ease-out"
-      />
-      
-      {/* Quick Action Button on Hover */}
-      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 bg-primary/10 backdrop-blur-[2px] z-20">
-        <motion.button
-          initial={{ scale: 0.8, y: 20 }}
-          whileHover={{ scale: 1.05, y: 0 }}
-          whileTap={{ scale: 0.95 }}
-          animate={{ 
-            scale: 1, 
-            y: 0,
-            transition: { delay: 0.1 } 
-          }}
-          className="bg-paper text-primary px-10 py-5 rounded-2xl text-sm font-black uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(0,0,0,0.5)] hover:bg-accent hover:text-white transition-colors"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClick();
-          }}
-        >
-          {item.listingType === 'auction' ? 'Place Bid' : 'Add to Cart'}
-        </motion.button>
-      </div>
-      
-      <div className="absolute top-6 left-6 right-6 flex justify-between items-start">
-        <div className="bg-paper/90 backdrop-blur-xl border border-primary/5 px-4 py-2 rounded-full shadow-lg">
-          <span className="text-base font-black text-ink uppercase tracking-widest">
-            {item.listingType === 'auction' ? 'Auction' : 'Buy Now'}
-          </span>
-        </div>
-        <button 
-          onClick={onToggleFavorite}
-          className={cn(
-            "w-10 h-10 rounded-full backdrop-blur-xl border border-white/20 flex items-center justify-center transition-all duration-500 hover:scale-110",
-            isFavorite ? "bg-accent text-white border-accent" : "bg-black/40 text-white hover:bg-white hover:text-primary"
-          )}
-        >
-          <Heart className={cn("w-4 h-4", isFavorite && "fill-current")} />
-        </button>
-      </div>
+          <div className="flex gap-12 md:gap-20 pt-8 border-t border-black/5">
+            <div className="space-y-1">
+              <span className="text-2xl md:text-4xl font-serif font-black text-ink">98%</span>
+              <p className="text-[10px] md:text-xs uppercase tracking-widest font-black text-ink/40">Authentication</p>
+            </div>
+            <div className="space-y-1">
+              <span className="text-2xl md:text-4xl font-serif font-black text-ink">12k+</span>
+              <p className="text-[10px] md:text-xs uppercase tracking-widest font-black text-ink/40">Elite Members</p>
+            </div>
+            <div className="space-y-1">
+              <span className="text-2xl md:text-4xl font-serif font-black text-ink">$4.2B</span>
+              <p className="text-[10px] md:text-xs uppercase tracking-widest font-black text-ink/40">Total Sales</p>
+            </div>
+          </div>
+        </motion.div>
 
-      <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-primary/80 via-transparent to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-700">
-        <div className="flex items-center gap-3">
-          <div className={cn("w-1.5 h-1.5 rounded-full", item.listingType === 'auction' ? "bg-accent animate-pulse" : "bg-green-400")} />
-          <span className="text-base uppercase tracking-[0.3em] font-black text-white">
-            {item.listingType === 'auction' ? 'Live Auction' : 'Instant Acquisition'}
-          </span>
-        </div>
+        {/* 3D Rotating Featured Lot */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, rotateY: 45 }}
+          animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+          transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
+          className="hidden lg:block perspective-[2000px]"
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+        >
+          <motion.div
+            animate={{ 
+              rotateX: rotate.x, 
+              rotateY: rotate.y,
+            }}
+            transition={{ type: 'spring', stiffness: 100, damping: 30 }}
+            className="relative aspect-[4/5] w-full max-w-md mx-auto bg-surface rounded-[3rem] shadow-[0_100px_200px_rgba(0,0,0,0.4)] overflow-hidden group border border-white/20"
+          >
+            <div className="absolute inset-0 z-0">
+              <LazyImage 
+                src={featuredImageUrl} 
+                alt="Featured Lot" 
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3s]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+            </div>
+
+            <div className="absolute top-10 left-10 z-10">
+              <div className="bg-accent text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                Featured Lot #402
+              </div>
+            </div>
+
+            <div className="absolute bottom-12 left-12 right-12 z-10 space-y-4">
+              <h3 className="text-3xl font-serif font-black text-white leading-none uppercase tracking-tighter">
+                Imperial Ming <br /> Dynasty Vase
+              </h3>
+              <div className="flex items-end justify-between">
+                <div className="space-y-1">
+                  <span className="text-[10px] uppercase tracking-[0.3em] font-black text-white/60">Current Valuation</span>
+                  <p className="text-4xl font-serif font-black text-white">$850,000</p>
+                </div>
+                <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center">
+                  <Gavel className="w-6 h-6 text-white" />
+                </div>
+              </div>
+            </div>
+
+            {/* Shine Effect */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-[1.5s] ease-in-out" />
+          </motion.div>
+        </motion.div>
       </div>
+    </section>
+  );
+};
+
+const CountdownTimer = ({ endTime }: { endTime?: Timestamp }) => {
+  const [timeLeft, setTimeLeft] = useState<{ days: number, hours: number, minutes: number, seconds: number } | null>(null);
+
+  useEffect(() => {
+    if (!endTime) return;
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = endTime.toDate().getTime() - now;
+      if (distance < 0) {
+        clearInterval(interval);
+        setTimeLeft(null);
+        return;
+      }
+      setTimeLeft({
+        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((distance % (1000 * 60)) / 1000)
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [endTime]);
+
+  if (!timeLeft) return <span className="text-accent font-black">AUCTION ENDED</span>;
+
+  return (
+    <div className="flex gap-4">
+      {[
+        { label: 'Days', value: timeLeft.days },
+        { label: 'Hrs', value: timeLeft.hours },
+        { label: 'Min', value: timeLeft.minutes },
+        { label: 'Sec', value: timeLeft.seconds }
+      ].map((unit) => (
+        <div key={unit.label} className="flex flex-col items-center">
+          <span className="text-2xl font-serif font-black text-primary">{unit.value.toString().padStart(2, '0')}</span>
+          <span className="text-[8px] uppercase tracking-widest font-black text-ink/40">{unit.label}</span>
+        </div>
+      ))}
     </div>
-    
-    <div className="p-4 md:p-6 space-y-3 md:space-y-4">
-      <div className="space-y-1 md:space-y-1.5">
-        <div className="flex items-center gap-2 md:gap-3">
-          <span className="text-[10px] uppercase tracking-[0.4em] font-black text-accent">{item.category}</span>
-          <span className="w-3 md:w-4 h-[1px] bg-primary/10" />
+  );
+};
+
+const ItemCard = ({ item, onClick, isFavorite, onToggleFavorite, onEdit }: { item: AuctionItem, onClick: () => void, isFavorite: boolean, onToggleFavorite: (e: React.MouseEvent) => void, onEdit?: (e: React.MouseEvent) => void }) => {
+  const [rotate, setRotate] = useState({ x: 0, y: 0 });
+
+  const isEndingSoon = useMemo(() => {
+    if (item.listingType !== 'auction' || !item.endTime || item.status !== 'active') return false;
+    const now = Date.now();
+    const end = item.endTime.toMillis();
+    const diff = end - now;
+    return diff > 0 && diff < 24 * 60 * 60 * 1000; // Less than 24 hours
+  }, [item]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = (y - centerY) / 25;
+    const rotateY = (centerX - x) / 25;
+    setRotate({ x: rotateX, y: rotateY });
+  };
+
+  const handleMouseLeave = () => {
+    setRotate({ x: 0, y: 0 });
+  };
+
+  return (
+    <motion.div 
+      layout
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      animate={{ 
+        rotateX: rotate.x, 
+        rotateY: rotate.y,
+        y: rotate.x !== 0 ? -10 : 0
+      }}
+      transition={{ type: 'spring', stiffness: 150, damping: 20 }}
+      className="group bg-surface border border-primary/5 overflow-hidden cursor-pointer shadow-sm hover:shadow-[0_80px_160px_rgba(0,0,0,0.3)] transition-all duration-500 rounded-[2.5rem] perspective-[1000px]"
+      onClick={onClick}
+    >
+      <div className="relative aspect-[3/4] overflow-hidden">
+        <LazyImage 
+          src={item.images[0] || `https://picsum.photos/seed/antique-${item.id}/800/1000`} 
+          alt={item.title}
+          imgClassName="img-fit group-hover:scale-110 transition-transform duration-[1.5s] ease-out"
+        />
+        
+        {/* Quick Action Button on Hover */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 bg-primary/20 backdrop-blur-[4px] z-20">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="bg-paper text-primary px-10 py-5 rounded-2xl text-sm font-black uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:bg-accent hover:text-white transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClick();
+            }}
+          >
+            {item.listingType === 'auction' ? 'Place Valuation' : 'Acquire Now'}
+          </motion.button>
         </div>
-        <h4 className="text-base md:text-lg font-serif font-black text-primary leading-tight group-hover:text-accent transition-colors duration-500">{item.title}</h4>
-      </div>
-      
-      <div className="flex items-end justify-between pt-3 md:pt-4 border-t border-primary/5">
-        <div className="space-y-0.5">
-          <span className="text-[8px] md:text-[10px] uppercase tracking-[0.4em] font-black text-ink/80 block">
-            {item.listingType === 'auction' ? 'Current Bid' : 'Acquisition Price'}
-          </span>
-          <div className="flex items-baseline gap-1">
-            <span className="text-[10px] md:text-xs font-serif italic text-accent">$</span>
-            <span className={cn(
-              "font-serif font-black",
-              item.listingType === 'buy-now' ? "text-base md:text-lg text-accent" : "text-base md:text-lg text-primary"
-            )}>
-              {(item.listingType === 'auction' ? item.currentBid : item.price)?.toLocaleString()}
+        
+        <div className="absolute top-6 left-6 right-6 flex justify-between items-start z-30">
+          <div className="flex flex-col gap-2">
+            <div className="bg-paper/90 backdrop-blur-xl border border-primary/5 px-4 py-2 rounded-full shadow-lg w-fit">
+              <span className="text-[10px] font-black text-ink uppercase tracking-widest">
+                {item.listingType === 'auction' ? 'Live Auction' : 'Private Treaty'}
+              </span>
+            </div>
+            {isEndingSoon && (
+              <motion.div 
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                className="bg-accent text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 w-fit"
+              >
+                <Clock className="w-3 h-3 animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Ending Soon</span>
+              </motion.div>
+            )}
+          </div>
+          <div className="flex items-center gap-3 md:gap-4">
+            <button 
+              onClick={onToggleFavorite}
+              className={cn(
+                "w-10 h-10 rounded-full backdrop-blur-xl border border-white/20 flex items-center justify-center transition-all duration-500 hover:scale-110",
+                isFavorite ? "bg-accent text-white border-accent" : "bg-black/40 text-white hover:bg-white hover:text-primary"
+              )}
+            >
+              <Heart className={cn("w-4 h-4", isFavorite && "fill-current")} />
+            </button>
+            {onEdit && (
+              <button 
+                onClick={onEdit}
+                className="w-10 h-10 rounded-full backdrop-blur-xl border border-white/20 bg-black/40 text-white flex items-center justify-center transition-all duration-500 hover:scale-110 hover:bg-white hover:text-primary"
+              >
+                <Edit className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-700 z-30">
+          <div className="flex items-center gap-3">
+            <div className={cn("w-2 h-2 rounded-full", item.listingType === 'auction' ? "bg-accent animate-pulse" : "bg-green-400")} />
+            <span className="text-xs uppercase tracking-[0.3em] font-black text-white">
+              {item.listingType === 'auction' ? 'Accepting Valuations' : 'Available Immediately'}
             </span>
           </div>
         </div>
-        
-        <button className="bg-primary text-white px-3 md:px-4 py-1.5 md:py-2 text-[8px] md:text-[10px] font-black uppercase tracking-widest hover:bg-accent transition-all">
-          {item.listingType === 'buy-now' ? 'Acquire' : 'View'}
-        </button>
       </div>
-    </div>
-  </motion.div>
-);
+      
+      <div className="p-8 space-y-6">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] uppercase tracking-[0.4em] font-black text-accent">{item.category}</span>
+            <span className="w-4 h-[1px] bg-primary/10" />
+          </div>
+          <h4 className="text-xl font-serif font-black text-primary leading-tight group-hover:text-accent transition-colors duration-500">{item.title}</h4>
+        </div>
+        
+        <div className="flex items-end justify-between pt-6 border-t border-primary/5">
+          <div className="space-y-1">
+            <span className="text-[10px] uppercase tracking-[0.4em] font-black text-ink/40 block">
+              {item.listingType === 'auction' ? 'Current Valuation' : 'Acquisition Price'}
+            </span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-black text-accent">$</span>
+              <span className="text-4xl font-serif font-black text-primary tracking-tighter">
+                {(item.listingType === 'auction' ? item.currentBid : item.price)?.toLocaleString()}
+              </span>
+            </div>
+          </div>
+          
+          <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-all duration-500">
+            <ArrowUpRight className="w-5 h-5" />
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
 
 const MembershipSection = ({ onApply }: { onApply: () => void }) => (
   <section id="membership" className="relative py-24 md:py-60 px-4 md:px-12 bg-primary overflow-hidden">
@@ -944,11 +1185,11 @@ const MembershipSection = ({ onApply }: { onApply: () => void }) => (
               <span className="text-accent text-base font-black tracking-[0.6em] uppercase">Private Membership</span>
             </div>
             <h3 className="text-3xl font-serif font-black text-white leading-[0.9] md:leading-[0.8] tracking-tighter uppercase">
-              The Gilded <br />
+              The Elite <br />
               <span className="italic font-extralight text-white/70 lowercase">circle</span>
             </h3>
             <p className="text-base md:text-lg font-serif italic text-white/90 max-w-xl leading-relaxed">
-              Join an exclusive community of the world's most discerning collectors. Gain early access to private treaty sales and expert curation services.
+              Join an exclusive community of the world's most discerning collectors. Gain early access to private auctions, early previews, and white-glove concierge services.
             </p>
           </div>
 
@@ -989,9 +1230,13 @@ const MembershipSection = ({ onApply }: { onApply: () => void }) => (
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
-          className="relative"
+          className="relative perspective-[2000px]"
         >
-          <div className="aspect-square md:aspect-square bg-white/5 border border-white/10 rounded-[3rem] md:rounded-[5rem] p-10 md:p-20 backdrop-blur-3xl flex flex-col justify-center items-center text-center space-y-12 md:space-y-16 group hover:border-accent/30 transition-all duration-1000">
+          <motion.div 
+            whileHover={{ rotateY: 15, rotateX: -5 }}
+            transition={{ type: 'spring', stiffness: 100, damping: 30 }}
+            className="aspect-square md:aspect-square bg-white/5 border border-white/10 rounded-[3rem] md:rounded-[5rem] p-10 md:p-20 backdrop-blur-3xl flex flex-col justify-center items-center text-center space-y-12 md:space-y-16 group hover:border-accent/30 transition-all duration-1000 shadow-[0_100px_200px_rgba(0,0,0,0.5)]"
+          >
             <div className="relative">
               <div className="absolute inset-0 bg-accent/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000" />
               <div className="w-24 h-24 md:w-40 md:h-40 bg-accent/10 rounded-full flex items-center justify-center border border-accent/20 relative z-10 group-hover:rotate-[360deg] transition-transform duration-[2s]">
@@ -1013,7 +1258,7 @@ const MembershipSection = ({ onApply }: { onApply: () => void }) => (
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </motion.div>
       </div>
     </div>
@@ -1063,25 +1308,25 @@ const Marketplace = ({
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 mb-16 md:mb-32">
           <div className="space-y-6 md:space-y-8">
             <div className="flex items-center gap-4">
-              <span className="w-12 h-[1px] bg-accent" />
-              <span className="text-base font-black uppercase tracking-[0.6em] text-accent">Global Archives</span>
+              <span className="w-12 h-[1px] bg-black" />
+              <span className="text-base font-black uppercase tracking-[0.6em] text-black">Global Catalogues</span>
             </div>
-            <h2 className="text-3xl font-serif font-black text-primary tracking-tighter leading-[0.9] md:leading-[0.8] uppercase">
+            <h2 className="text-3xl font-serif font-black text-black tracking-tighter leading-[0.9] md:leading-[0.8] uppercase">
               The <br/>Marketplace
             </h2>
           </div>
           
           <div className="flex flex-wrap gap-4 md:gap-8 items-center">
             <div className="flex overflow-x-auto pb-2 -mb-2 no-scrollbar lg:flex-wrap gap-2 md:gap-4 w-full lg:w-auto">
-              {['all', 'Trending', 'Jewelry', 'Furniture', 'Art', 'Manuscripts', 'Textiles'].map((cat) => (
+              {['all', 'Trending', 'Fine Art', 'Timepieces', 'Furniture', 'Jewelry', 'Manuscripts'].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setFilterType(cat)}
                   className={cn(
                     "px-4 md:px-8 py-2 md:py-4 text-xs md:text-base font-black tracking-[0.3em] uppercase transition-all duration-500 border-b-2 whitespace-nowrap",
                     filterType === cat 
-                      ? "border-accent text-primary" 
-                      : "border-transparent text-primary/30 hover:text-primary hover:border-primary/20"
+                      ? "border-black text-black" 
+                      : "border-transparent text-black/30 hover:text-black hover:border-black/20"
                   )}
                 >
                   {cat}
@@ -1118,6 +1363,53 @@ const Marketplace = ({
               />
             ))}
           </AnimatePresence>
+        </div>
+
+        {/* 3D UX Review Section */}
+        <div className="mt-32 md:mt-60 space-y-20">
+          <div className="text-center space-y-6">
+            <span className="text-accent text-base font-black tracking-[0.6em] uppercase">Elite Reviews</span>
+            <h3 className="text-4xl md:text-7xl font-serif font-black text-primary leading-none tracking-tighter uppercase">
+              The Member <br />
+              <span className="italic font-extralight text-ink/40 lowercase">experience</span>
+            </h3>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 md:gap-12 perspective-[2000px]">
+            {[
+              { name: "Alexander V.", role: "Fine Art Collector", text: "The 3D valuation interface is revolutionary. I can inspect every detail of the lot before placing my bid. Truly elite service." },
+              { name: "Elena S.", role: "Watch Enthusiast", text: "Strawboss has set a new standard for digital auctions. The real-time feedback and secure acquisition process are unmatched." },
+              { name: "Julian M.", role: "Historical Archivist", text: "Provenance is everything. The transparency and authentication rigor at Strawboss give me complete confidence in every acquisition." }
+            ].map((review, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, rotateY: -30, y: 50 }}
+                whileInView={{ opacity: 1, rotateY: 0, y: 0 }}
+                viewport={{ once: true }}
+                whileHover={{ rotateY: 10, rotateX: -5, y: -10 }}
+                transition={{ duration: 1, delay: i * 0.2, type: 'spring', stiffness: 100 }}
+                className="bg-surface p-10 md:p-12 rounded-[3rem] border border-primary/5 shadow-xl hover:shadow-[0_40px_80px_rgba(0,0,0,0.1)] space-y-8 group transition-all duration-500"
+              >
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <Star key={star} className="w-4 h-4 fill-accent text-accent" />
+                  ))}
+                </div>
+                <p className="text-lg md:text-xl font-serif italic text-primary/70 leading-relaxed">
+                  "{review.text}"
+                </p>
+                <div className="pt-8 border-t border-primary/5 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center font-black text-primary">
+                    {review.name[0]}
+                  </div>
+                  <div>
+                    <p className="text-sm font-black uppercase tracking-widest text-primary">{review.name}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-primary/40">{review.role}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
 
         {!loading && items.length === 0 && (
@@ -1172,7 +1464,7 @@ const ProfileEditor = ({ profile, onSave, onCancel }: { profile: UserProfile, on
   });
   const [isSaving, setIsSaving] = useState(false);
 
-  const categories = ['Jewelry', 'Furniture', 'Art', 'Manuscripts', 'Textiles', 'Other'];
+  const categories = ['Fine Art', 'Timepieces', 'Furniture', 'Jewelry', 'Manuscripts', 'Other'];
 
   const toggleCategory = (cat: string) => {
     setFormData(prev => ({
@@ -1286,6 +1578,7 @@ const UserDashboard = ({
   onToggleFavorite,
   onLeaveReview,
   onUpdateProfile,
+  onEditItem,
   items,
   searchQuery,
   setSearchQuery,
@@ -1297,6 +1590,7 @@ const UserDashboard = ({
   onItemClick: (item: AuctionItem) => void,
   onToggleFavorite: (id: string, e: React.MouseEvent) => void,
   onLeaveReview: (item: AuctionItem) => void,
+  onEditItem: (item: AuctionItem) => void,
   onUpdateProfile: (data: Partial<UserProfile>) => Promise<void>,
   items: AuctionItem[],
   searchQuery: string,
@@ -1411,7 +1705,7 @@ const UserDashboard = ({
         {/* Saved Items */}
         <div className="space-y-8">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-primary uppercase tracking-widest">Saved Artifacts</h3>
+            <h3 className="text-xl font-bold text-primary uppercase tracking-widest">Saved Pieces</h3>
             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{favorites.length} Items</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -1450,6 +1744,10 @@ const UserDashboard = ({
                 onClick={() => onItemClick(item)} 
                 isFavorite={favorites.some(f => f.id === item.id)}
                 onToggleFavorite={(e) => onToggleFavorite(item.id, e)}
+                onEdit={(e) => {
+                  e.stopPropagation();
+                  onEditItem(item);
+                }}
               />
             ))}
             {consignments.length === 0 && (
@@ -1477,7 +1775,7 @@ const UserDashboard = ({
                 />
                 <button
                   onClick={() => onLeaveReview(item)}
-                  className="w-full py-4 bg-gray-50 text-primary text-xs font-bold uppercase tracking-widest rounded-2xl hover:bg-blue-50 transition-colors"
+                  className="w-full py-4 bg-zinc-50 text-black text-xs font-bold uppercase tracking-widest hover:bg-zinc-100 transition-colors"
                 >
                   Leave Feedback
                 </button>
@@ -1500,7 +1798,7 @@ const ConsignmentForm = ({ onCancel, onSubmit, initialData }: { onCancel: () => 
     title: '',
     description: '',
     listingType: 'buy-now',
-    category: 'Jewelry',
+    category: 'Fine Art',
     price: '',
     startingBid: '',
     duration: '7',
@@ -1515,7 +1813,7 @@ const ConsignmentForm = ({ onCancel, onSubmit, initialData }: { onCancel: () => 
     }
     setIsGenerating(true);
     try {
-      const description = await generateArtifactDescription(formData.title, formData.category, formData.listingType);
+      const description = await generateItemDescription(formData.title, formData.category, formData.listingType);
       if (description) {
         setFormData({ ...formData, description });
         if (errors.description) setErrors(prev => {
@@ -1533,7 +1831,7 @@ const ConsignmentForm = ({ onCancel, onSubmit, initialData }: { onCancel: () => 
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.title.trim()) newErrors.title = "Artifact title is required";
+    if (!formData.title.trim()) newErrors.title = "Item title is required";
     if (!formData.description.trim()) newErrors.description = "Provenance and history details are required";
     if (formData.listingType === 'buy-now' && (!formData.price || Number(formData.price) <= 0)) {
       newErrors.price = "Valid asking price is required";
@@ -1541,7 +1839,7 @@ const ConsignmentForm = ({ onCancel, onSubmit, initialData }: { onCancel: () => 
     if (formData.listingType === 'auction' && (!formData.startingBid || Number(formData.startingBid) <= 0)) {
       newErrors.startingBid = "Valid starting reserve is required";
     }
-    if (!formData.image) newErrors.image = "Artifact visual documentation is required";
+    if (!formData.image) newErrors.image = "Item visual documentation is required";
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -1578,19 +1876,19 @@ const ConsignmentForm = ({ onCancel, onSubmit, initialData }: { onCancel: () => 
     >
       <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-12 items-start">
         {/* Left Side: Photography Guide */}
-        <div className="bg-blue-50/50 rounded-3xl p-8 space-y-8">
-          <h3 className="text-lg font-bold text-primary uppercase tracking-widest">Photography Guide</h3>
-          <ul className="space-y-4 text-sm font-medium text-gray-600">
+        <div className="bg-zinc-50 p-8 space-y-8">
+          <h3 className="text-lg font-bold text-black uppercase tracking-widest">Photography Guide</h3>
+          <ul className="space-y-4 text-sm font-medium text-zinc-600">
             <li className="flex items-start gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5" />
+              <div className="w-1.5 h-1.5 rounded-full bg-black mt-1.5" />
               <span>Use natural, soft lighting</span>
             </li>
             <li className="flex items-start gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5" />
+              <div className="w-1.5 h-1.5 rounded-full bg-black mt-1.5" />
               <span>Include multiple angles</span>
             </li>
             <li className="flex items-start gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5" />
+              <div className="w-1.5 h-1.5 rounded-full bg-black mt-1.5" />
               <span>Focus on makers' marks or signatures</span>
             </li>
             <li className="flex items-start gap-3">
@@ -1630,9 +1928,18 @@ const ConsignmentForm = ({ onCancel, onSubmit, initialData }: { onCancel: () => 
 
         {/* Right Side: Form */}
         <div className="bg-white rounded-[2.5rem] border border-gray-100 p-8 md:p-12 shadow-sm space-y-10">
+          <div className="space-y-2 border-b border-gray-100 pb-6">
+            <h2 className="text-2xl font-serif font-black text-primary uppercase tracking-tight">
+              {initialData ? 'Refine Artifact Details' : 'Consign New Artifact'}
+            </h2>
+            <p className="text-sm text-zinc-400 font-medium tracking-widest uppercase">
+              {initialData ? 'Update provenance and valuation' : 'Submit for elite curation'}
+            </p>
+          </div>
+
           <div className="space-y-8">
             <div className="space-y-3">
-              <label className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">Artifact Title</label>
+              <label className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">Item Title</label>
               <input 
                 className="input-field"
                 placeholder="e.g. 17th Century Imperial Jade Vessel"
@@ -1650,11 +1957,11 @@ const ConsignmentForm = ({ onCancel, onSubmit, initialData }: { onCancel: () => 
                   value={formData.category}
                   onChange={e => setFormData({...formData, category: e.target.value})}
                 >
-                  <option value="Jewelry">Jewelry</option>
+                  <option value="Fine Art">Fine Art</option>
+                  <option value="Timepieces">Timepieces</option>
                   <option value="Furniture">Furniture</option>
-                  <option value="Art">Fine Art</option>
+                  <option value="Jewelry">Jewelry</option>
                   <option value="Manuscripts">Manuscripts</option>
-                  <option value="Textiles">Textiles</option>
                   <option value="Other">Other</option>
                 </select>
               </div>
@@ -1707,7 +2014,7 @@ const ConsignmentForm = ({ onCancel, onSubmit, initialData }: { onCancel: () => 
               onClick={handleFormSubmit}
               className="btn-primary w-full py-6 text-base"
             >
-              Submit Artifact for Review
+              {initialData ? 'Update Artifact Details' : 'Submit Piece for Review'}
             </button>
             <p className="text-[10px] font-bold text-center text-gray-400 uppercase tracking-widest">
               By submitting, you agree to our terms of authenticity.
@@ -1791,7 +2098,7 @@ const ItemDetail = ({
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 to: buyer.email,
-                subject: `Artifact Shipped: ${item.title}`,
+                subject: `Item Shipped: ${item.title}`,
                 html: `<p>Great news! Your artifact <strong>${item.title}</strong> has been shipped.</p>
                        <p>Our elite logistics team is ensuring its safe arrival.</p>
                        <a href="${window.location.origin}">Track Acquisition</a>`
@@ -1809,6 +2116,23 @@ const ItemDetail = ({
   const [orderConfirmed, setOrderConfirmed] = useState(false);
   const [appError, setAppError] = useState<Error | null>(null);
   const [selectedImage, setSelectedImage] = useState(item.images[0] || `https://picsum.photos/seed/${item.id}/1200/1500`);
+  const [rotate, setRotate] = useState({ x: 0, y: 0 });
+  const [showHammer, setShowHammer] = useState(false);
+
+  const handleImageMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = (y - centerY) / 15;
+    const rotateY = (centerX - x) / 15;
+    setRotate({ x: rotateX, y: rotateY });
+  };
+
+  const handleImageMouseLeave = () => {
+    setRotate({ x: 0, y: 0 });
+  };
 
   if (appError) throw appError;
 
@@ -1865,6 +2189,9 @@ const ItemDetail = ({
         bidCount: (item.bidCount || 0) + 1,
         lastBidderUid: user.uid
       });
+
+      setShowHammer(true);
+      setTimeout(() => setShowHammer(false), 2000);
 
       // Notify previous bidder
       if (previousBidderUid && previousBidderUid !== user.uid) {
@@ -1956,27 +2283,64 @@ const ItemDetail = ({
               ))}
             </div>
 
-            {/* Main Image */}
+            {/* Main 3D Image Container */}
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="relative flex-1 aspect-[3/4] rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-paper shadow-2xl group"
+              className="relative flex-1 aspect-[3/4] rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-paper shadow-2xl group perspective-[2000px]"
+              onMouseMove={handleImageMouseMove}
+              onMouseLeave={handleImageMouseLeave}
             >
-              <img 
-                src={selectedImage} 
-                alt={item.title} 
-                className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105" 
-                referrerPolicy="no-referrer"
-              />
-              
-              {/* Badges and Icons */}
-              <div className="absolute top-8 left-8">
-                <div className="bg-primary text-white px-6 py-3 rounded-full flex items-center gap-3 shadow-xl">
-                  <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-                  <span className="text-base font-black uppercase tracking-widest">SB Certified</span>
+              <motion.div
+                animate={{ 
+                  rotateX: rotate.x, 
+                  rotateY: rotate.y,
+                }}
+                transition={{ type: 'spring', stiffness: 100, damping: 30 }}
+                className="w-full h-full"
+              >
+                <img 
+                  src={selectedImage} 
+                  alt={item.title} 
+                  className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105" 
+                  referrerPolicy="no-referrer"
+                />
+                {/* Shine effect */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-[1.5s]" />
+              </motion.div>
+
+              {/* Hammer Animation Overlay */}
+              <AnimatePresence>
+                {showHammer && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.5, rotate: -45 }}
+                    animate={{ opacity: 1, scale: 1.5, rotate: 0 }}
+                    exit={{ opacity: 0, scale: 2, rotate: 45 }}
+                    className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none"
+                  >
+                    <div className="bg-accent/90 backdrop-blur-xl p-12 rounded-full shadow-[0_0_100px_rgba(225,29,72,0.5)]">
+                      <Gavel className="w-24 h-24 text-white" />
+                      <motion.p 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-white font-black uppercase tracking-[0.5em] mt-4 text-center"
+                      >
+                        Valuation Accepted
+                      </motion.p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Live Status Badge */}
+              <div className="absolute top-8 left-8 z-30">
+                <div className="bg-accent text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3 shadow-xl">
+                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                  Live Valuation
                 </div>
               </div>
-
+              
+              {/* Badges and Icons */}
               <button 
                 onClick={(e) => onToggleFavorite(item.id, e)}
                 className="absolute top-8 right-8 w-14 h-14 bg-paper/80 backdrop-blur-xl rounded-full flex items-center justify-center shadow-xl hover:bg-paper transition-all group/heart"
@@ -2018,22 +2382,43 @@ const ItemDetail = ({
 
               <div className="space-y-2">
                 <div className="flex items-center gap-3 md:gap-4">
-                  <span className="text-2xl md:text-3xl font-serif font-black text-accent">
-                    ${(item.listingType === 'auction' ? item.currentBid : item.price)?.toLocaleString()}
-                  </span>
-                  <span className="text-lg md:text-xl font-serif text-primary/20 line-through">
-                    ${originalPrice.toLocaleString()}
-                  </span>
-                  <span className="bg-accent/10 text-accent px-2 md:px-3 py-1 rounded-full text-xs md:text-base font-black uppercase tracking-widest">
-                    {discountPercent}% OFF
-                  </span>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase tracking-[0.4em] font-black text-ink/40 mb-2">Acquisition Price</span>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-3xl md:text-4xl font-black text-accent">$</span>
+                      <span className="text-4xl md:text-8xl font-serif font-black text-accent tracking-tighter">
+                        {(item.listingType === 'auction' ? item.currentBid : item.price)?.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col justify-end pb-2">
+                    <span className="text-lg md:text-2xl font-serif text-primary/20 line-through">
+                      ${originalPrice.toLocaleString()}
+                    </span>
+                    <span className="bg-accent/10 text-accent px-2 md:px-3 py-1 rounded-full text-xs md:text-base font-black uppercase tracking-widest w-fit">
+                      {discountPercent}% OFF
+                    </span>
+                  </div>
                 </div>
                 <p className="text-[10px] md:text-base font-black text-primary/30 uppercase tracking-[0.4em]">Limited-Time Acquisition Opportunity</p>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="space-y-6 pt-4">
+            <div className="space-y-8 pt-4">
+              {item.listingType === 'auction' && (
+                <div className="bg-primary/5 p-8 rounded-3xl border border-primary/10 space-y-6">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-black uppercase tracking-widest text-ink/60">Auction Ends In</span>
+                    <CountdownTimer endTime={item.endTime} />
+                  </div>
+                  <div className="flex justify-between items-center pt-4 border-t border-primary/10">
+                    <span className="text-xs font-black uppercase tracking-widest text-ink/60">Current Bidder</span>
+                    <span className="text-sm font-serif italic text-primary">{item.lastBidderUid ? 'Elite Member #'+item.lastBidderUid.slice(0,4) : 'No Bids Yet'}</span>
+                  </div>
+                </div>
+              )}
+
               {item.status === 'active' ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {item.listingType === 'buy-now' ? (
@@ -2042,20 +2427,20 @@ const ItemDetail = ({
                         whileHover={{ scale: 1.02, y: -5 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setShowCheckout(true)}
-                        className="bg-primary text-white py-8 rounded-2xl text-base font-black tracking-[0.6em] uppercase shadow-2xl hover:bg-accent transition-all duration-700"
+                        className="bg-primary text-white py-6 md:py-8 rounded-2xl text-sm md:text-base font-black tracking-[0.6em] uppercase shadow-2xl hover:bg-accent transition-all duration-700"
                       >
-                        Acquire Artifact
+                        Private Treaty Acquisition
                       </motion.button>
                       <motion.button 
                         whileHover={{ scale: 1.02, y: -5 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={toggleWatchlist}
                         className={cn(
-                          "bg-paper text-primary border-2 py-8 rounded-2xl text-base font-black tracking-[0.6em] uppercase transition-all duration-700",
+                          "bg-paper text-primary border-2 py-6 md:py-8 rounded-2xl text-sm md:text-base font-black tracking-[0.6em] uppercase transition-all duration-700",
                           isWatching ? "border-accent text-accent" : "border-primary hover:bg-primary hover:text-white"
                         )}
                       >
-                        {isWatching ? 'Watching' : 'Watch Artifact'}
+                        {isWatching ? 'Watching' : 'Watch Piece'}
                       </motion.button>
                     </>
                   ) : (
@@ -2064,7 +2449,7 @@ const ItemDetail = ({
                         <span className="absolute left-8 top-1/2 -translate-y-1/2 text-accent font-serif text-2xl opacity-40 group-focus-within:opacity-100 transition-opacity">$</span>
                         <input 
                           type="number" 
-                          className="w-full bg-paper border-2 border-transparent py-8 pl-16 pr-8 outline-none focus:border-accent font-serif text-2xl rounded-2xl transition-all"
+                          className="w-full bg-paper border-2 border-transparent py-6 md:py-8 pl-16 pr-8 outline-none focus:border-accent font-serif text-xl md:text-2xl rounded-2xl transition-all"
                           placeholder="Enter Elite Bid"
                           value={bidAmount}
                           onChange={e => setBidAmount(e.target.value)}
@@ -2084,7 +2469,7 @@ const ItemDetail = ({
               ) : (
                 <div className="space-y-6">
                   <div className="w-full bg-primary/5 text-primary/20 py-10 rounded-2xl text-center text-base font-black tracking-[0.6em] uppercase border-2 border-dashed border-primary/10">
-                    Artifact Acquired
+                    Piece Acquired
                   </div>
                   {user?.email === 'smubasshir532@gmail.com' && item.status === 'sold' && item.shippingStatus !== 'shipped' && (
                     <motion.button 
@@ -2128,6 +2513,56 @@ const ItemDetail = ({
                     </div>
                   </div>
                   <Info className="w-5 h-5 text-primary/20 group-hover:text-accent transition-colors" />
+                </div>
+              </div>
+            </div>
+
+            {/* Bid History & Provenance */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-12 border-t border-primary/5">
+              <div className="space-y-6">
+                <h4 className="text-lg font-black uppercase tracking-widest text-primary">Provenancial History</h4>
+                <div className="space-y-4">
+                  <div className="flex gap-4 items-start">
+                    <div className="w-1 h-1 rounded-full bg-accent mt-2" />
+                    <p className="text-sm text-ink/70 font-serif italic">Authenticated by Strawboss Elite Appraisal Team.</p>
+                  </div>
+                  <div className="flex gap-4 items-start">
+                    <div className="w-1 h-1 rounded-full bg-accent mt-2" />
+                    <p className="text-sm text-ink/70 font-serif italic">Certificate of Authenticity included with acquisition.</p>
+                  </div>
+                  <div className="flex gap-4 items-start">
+                    <div className="w-1 h-1 rounded-full bg-accent mt-2" />
+                    <p className="text-sm text-ink/70 font-serif italic">Insured white-glove delivery worldwide.</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Seller Info */}
+            <div className="pt-12 border-t border-primary/5">
+              <div className="bg-paper p-8 rounded-3xl border border-primary/5 flex items-center justify-between">
+                <div className="flex items-center gap-6">
+                  <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center border border-primary/5">
+                    <UserIcon className="w-8 h-8 text-primary/40" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-black uppercase tracking-widest text-primary">{item.sellerName}</h4>
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-accent" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-accent">Verified Elite Consignor</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="hidden md:flex gap-12">
+                  <div className="text-center">
+                    <p className="text-xl font-serif font-black text-primary">48</p>
+                    <p className="text-[8px] uppercase tracking-widest font-black text-ink/40">Sales</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-serif font-black text-primary">100%</p>
+                    <p className="text-[8px] uppercase tracking-widest font-black text-ink/40">Positive</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2329,7 +2764,7 @@ const ItemDetail = ({
           >
             <div className="flex items-center gap-4 mb-8 md:mb-12">
               <span className="w-8 md:w-12 h-[1px] bg-accent" />
-              <h3 className="text-2xl md:text-4xl font-display font-black text-primary uppercase tracking-tighter">Related Artifacts</h3>
+              <h3 className="text-2xl md:text-4xl font-display font-black text-primary uppercase tracking-tighter">Related Pieces</h3>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-12">
               {loading ? (
@@ -2422,7 +2857,7 @@ const AdminPanel = ({
           className="bg-primary text-white px-10 py-5 rounded-2xl text-base font-black tracking-widest uppercase hover:bg-accent transition-all shadow-xl flex items-center gap-4"
         >
           <Plus className="w-4 h-4" />
-          Add New Artifact
+          Add New Piece
         </button>
       </div>
 
@@ -2516,7 +2951,7 @@ const AdminPanel = ({
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-primary text-white text-sm uppercase tracking-widest font-bold">
-                <th className="p-6">Artifact</th>
+                <th className="p-6">Piece</th>
                 <th className="p-6">Type</th>
                 <th className="p-6">Price/Bid</th>
                 <th className="p-6">Status</th>
@@ -2624,25 +3059,6 @@ const ReviewsSection = () => {
   return (
     <section className="py-24 md:py-40 px-4 md:px-6 bg-paper text-primary overflow-hidden relative">
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="text-center mb-16 md:mb-32">
-          <motion.span 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            className="text-primary text-base font-black tracking-[0.6em] uppercase mb-4 md:mb-6 block"
-          >
-            Voices of the Elite
-          </motion.span>
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-3xl font-serif font-black tracking-tighter uppercase"
-          >
-            TRUSTED BY <br />
-            <span className="italic text-ink/80 font-extralight lowercase">connoisseurs</span>
-          </motion.h2>
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
           {reviews.map((review, index) => (
             <motion.div
@@ -2825,7 +3241,7 @@ const CheckoutModal = ({ item, user, onCancel, onConfirm }: { item: AuctionItem,
               <div className="space-y-6">
                 <div className="bg-primary/[0.02] p-6 rounded-[2rem] border border-primary/5 space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-black uppercase tracking-widest text-primary/40">Artifact</span>
+                    <span className="text-xs font-black uppercase tracking-widest text-primary/40">Piece</span>
                     <span className="text-sm font-serif italic text-primary">{item.title}</span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -2911,62 +3327,125 @@ const CheckoutModal = ({ item, user, onCancel, onConfirm }: { item: AuctionItem,
   );
 };
 
-const AboutSection = ({ featuredImageUrl }: { featuredImageUrl: string }) => (
-  <section id="about" className="py-24 md:py-40 px-4 md:px-8 bg-paper overflow-hidden relative">
-    <div className="max-w-7xl mx-auto">
-      <div className="grid lg:grid-cols-2 gap-16 md:gap-32 items-center">
-        <motion.div 
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-          className="space-y-8 md:space-y-12"
-        >
-          <span className="text-primary text-base font-black tracking-[0.6em] uppercase">Our Heritage</span>
-          <h3 className="text-3xl font-serif font-black text-primary leading-[0.9] tracking-tighter uppercase">
-            A Legacy of <br />
-            <span className="italic font-extralight text-ink/80 lowercase">excellence</span>
-          </h3>
-          <p className="text-lg md:text-xl font-serif italic text-primary/60 max-w-lg leading-relaxed">
-            Founded in 1924, Strawboss has been at the forefront of the global antiquities market for over a century. Our mission is to preserve history through ethical acquisition and expert curation.
-          </p>
-          <div className="grid grid-cols-2 gap-8 md:gap-12 pt-8 border-t border-primary/5">
-            <div className="space-y-2 md:space-y-4">
-              <h4 className="text-3xl font-serif font-black text-primary tracking-tighter">100+</h4>
-              <p className="text-base uppercase tracking-widest text-ink/80 font-black">Years of Heritage</p>
-            </div>
-            <div className="space-y-2 md:space-y-4">
-              <h4 className="text-3xl font-serif font-black text-primary tracking-tighter">50k+</h4>
-              <p className="text-base uppercase tracking-widest text-ink/80 font-black">Artifacts Curated</p>
-            </div>
-          </div>
-        </motion.div>
+const AboutSection = () => {
+  const [activeStep, setActiveStep] = useState(0);
+  const steps = [
+    { title: "Sourcing", desc: "Our curators travel the globe to find pieces with undeniable provenance and historical weight." },
+    { title: "Authentication", desc: "Every artifact undergoes rigorous scientific and historical verification by our elite appraisal team." },
+    { title: "Valuation", desc: "We establish fair market reserves based on rarity, condition, and recent global auction trends." },
+    { title: "Acquisition", desc: "Secure your piece through our high-stakes digital auction or exclusive private treaty sales." }
+  ];
 
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-          className="relative"
-        >
-          <div className="aspect-[4/5] bg-primary/5 rounded-[2rem] md:rounded-[4rem] overflow-hidden group border border-primary/5">
-            <LazyImage 
-              src={featuredImageUrl} 
-              alt="Heritage" 
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-2000"
-            />
-            <div className="absolute inset-0 bg-primary/10 mix-blend-overlay" />
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveStep((prev) => (prev + 1) % steps.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [steps.length]);
+
+  return (
+    <section id="about" className="py-24 md:py-60 px-4 md:px-12 bg-paper overflow-hidden">
+      <div className="max-w-[1800px] mx-auto grid lg:grid-cols-2 gap-24 items-center">
+        <div className="space-y-16">
+          <div className="space-y-8">
+            <div className="flex items-center gap-4">
+              <span className="w-12 h-[1px] bg-black" />
+              <span className="text-primary text-base font-black tracking-[0.6em] uppercase">Our Heritage</span>
+            </div>
+            <h3 className="text-4xl md:text-7xl font-serif font-black text-primary leading-[0.85] tracking-tighter uppercase">
+              A Legacy of <br />
+              <span className="italic font-extralight text-ink/40 lowercase">curation</span>
+            </h3>
+            <p className="text-lg md:text-2xl font-serif italic text-primary/60 max-w-lg leading-relaxed">
+              Founded in the pursuit of the extraordinary, Strawboss Elite Auctions has served the world's most discerning collectors for decades.
+            </p>
           </div>
-          <div className="absolute -bottom-12 -right-12 w-64 h-64 bg-accent/10 blur-[100px] rounded-full" />
-        </motion.div>
+
+          {/* 3D Rotating Steps */}
+          <div className="relative min-h-[300px] md:h-[300px] perspective-[1000px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeStep}
+                initial={{ opacity: 0, rotateX: -90, y: 50 }}
+                animate={{ opacity: 1, rotateX: 0, y: 0 }}
+                exit={{ opacity: 0, rotateX: 90, y: -50 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute inset-0 flex flex-col justify-center space-y-6 bg-primary/5 p-12 rounded-[3rem] border border-primary/5"
+              >
+                <div className="flex items-center gap-6">
+                  <span className="text-6xl font-serif font-black text-accent/20">0{activeStep + 1}</span>
+                  <h4 className="text-3xl font-serif font-black text-primary uppercase tracking-tighter">{steps[activeStep].title}</h4>
+                </div>
+                <p className="text-xl font-serif italic text-primary/60 leading-relaxed">
+                  {steps[activeStep].desc}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+            
+            <div className="absolute bottom-[-40px] left-12 flex gap-4">
+              {steps.map((_, i) => (
+                <button 
+                  key={i}
+                  onClick={() => setActiveStep(i)}
+                  className={cn(
+                    "w-12 h-1.5 rounded-full transition-all duration-500",
+                    activeStep === i ? "bg-accent w-24" : "bg-primary/10 hover:bg-primary/20"
+                  )}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="relative">
+          <motion.div 
+            animate={{ 
+              y: [0, -20, 0],
+              rotate: [0, 2, 0]
+            }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="relative aspect-square rounded-[4rem] overflow-hidden shadow-[0_80px_160px_rgba(0,0,0,0.2)]"
+          >
+            <LazyImage 
+              src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=1000" 
+              alt="Curation"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-accent/10 mix-blend-overlay" />
+          </motion.div>
+          
+          {/* Floating 3D Elements */}
+          <motion.div 
+            animate={{ 
+              rotate: 360,
+              scale: [1, 1.1, 1]
+            }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+            className="absolute -top-12 -right-12 w-48 h-48 border border-accent/20 rounded-full flex items-center justify-center backdrop-blur-sm"
+          >
+            <div className="w-40 h-40 border border-accent/10 rounded-full flex items-center justify-center">
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-accent animate-pulse">Elite Certified</span>
+            </div>
+          </motion.div>
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 const Footer = ({ onNewsletterSubmit, showSuccess, featuredImageUrl }: { onNewsletterSubmit: (e: React.FormEvent) => void, showSuccess: boolean, featuredImageUrl: string }) => (
-  <footer className="bg-paper text-primary py-32 px-8 border-t border-primary/5">
-    <div className="max-w-7xl mx-auto">
+  <footer className="bg-paper text-primary py-32 px-8 border-t border-primary/5 relative overflow-hidden">
+    {/* Rotating Gavel Background */}
+    <div className="absolute -bottom-20 -right-20 opacity-[0.02] pointer-events-none">
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+      >
+        <Gavel className="w-[600px] h-[600px]" />
+      </motion.div>
+    </div>
+
+    <div className="max-w-7xl mx-auto relative z-10">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-20 mb-24">
         <div className="col-span-1 md:col-span-2 space-y-8">
           <div className="flex items-center gap-4">
@@ -2981,33 +3460,33 @@ const Footer = ({ onNewsletterSubmit, showSuccess, featuredImageUrl }: { onNewsl
             <h3 className="text-xl font-serif font-black uppercase tracking-tighter">Strawboss</h3>
           </div>
           <p className="text-ink/80 text-sm max-w-sm leading-relaxed font-serif italic">
-            The global standard for authenticated antiquities. Built on trust, provenance, and expertise.
+            Est. 1924. The global standard for authenticated elite auctions and private treaties. Built on trust, provenance, and worldwide white-glove expertise.
           </p>
         </div>
 
         <div className="space-y-6">
-          <h4 className="text-base font-black uppercase tracking-widest text-primary">Explore</h4>
-          <ul className="space-y-4 text-base font-black uppercase tracking-widest text-ink/80">
-            <li><a href="#" className="hover:text-primary transition-colors">Marketplace</a></li>
-            <li><a href="#" className="hover:text-primary transition-colors">Auctions</a></li>
-            <li><a href="#" className="hover:text-primary transition-colors">Consign</a></li>
-            <li><a href="#" className="hover:text-primary transition-colors">Membership</a></li>
+          <h4 className="text-base font-black uppercase tracking-widest text-primary">Catalogues</h4>
+          <ul className="space-y-4 text-xs font-black uppercase tracking-widest text-ink/80">
+            <li><a href="#" className="hover:text-primary transition-colors">Antiques</a></li>
+            <li><a href="#" className="hover:text-primary transition-colors">Collection</a></li>
+            <li><a href="#" className="hover:text-primary transition-colors">Live Auctions</a></li>
+            <li><a href="#" className="hover:text-primary transition-colors">New Acquisitions</a></li>
           </ul>
         </div>
 
         <div className="space-y-6">
-          <h4 className="text-base font-black uppercase tracking-widest text-primary">Connect</h4>
-          <ul className="space-y-4 text-base font-black uppercase tracking-widest text-ink/80">
-            <li><a href="#" className="hover:text-primary transition-colors">Instagram</a></li>
-            <li><a href="#" className="hover:text-primary transition-colors">LinkedIn</a></li>
-            <li><a href="#" className="hover:text-primary transition-colors">Twitter</a></li>
+          <h4 className="text-base font-black uppercase tracking-widest text-primary">Services</h4>
+          <ul className="space-y-4 text-xs font-black uppercase tracking-widest text-ink/80">
+            <li><a href="#" className="hover:text-primary transition-colors">Consign</a></li>
+            <li><a href="#" className="hover:text-primary transition-colors">Private Treaty</a></li>
+            <li><a href="#" className="hover:text-primary transition-colors">White-Glove Delivery</a></li>
             <li><a href="#" className="hover:text-primary transition-colors">Contact</a></li>
           </ul>
         </div>
       </div>
 
       <div className="pt-12 border-t border-primary/5 flex flex-col md:flex-row justify-between items-center gap-8 text-base font-black uppercase tracking-[0.3em] text-primary/20">
-        <span>© 2024 Strawboss Antiquities Ltd.</span>
+        <span>© 2024 Strawboss Elite Auctions Ltd.</span>
         <div className="flex gap-10">
           <a href="#" className="hover:text-primary transition-colors">Privacy</a>
           <a href="#" className="hover:text-primary transition-colors">Terms</a>
@@ -3194,26 +3673,51 @@ export default function App() {
     if (!user) return alert("Please sign in to list an item.");
     
     try {
-      const newItem = {
-        title: data.title,
-        description: data.description,
-        listingType: data.listingType,
-        category: data.category,
-        price: data.listingType === 'buy-now' ? parseFloat(data.price) : null,
-        currentBid: data.listingType === 'auction' ? parseFloat(data.startingBid) : null,
-        bidCount: 0,
-        images: [data.image],
-        sellerUid: user.uid,
-        sellerName: user.displayName,
-        status: 'active',
-        createdAt: serverTimestamp(),
-        endTime: data.listingType === 'auction' ? Timestamp.fromDate(new Date(Date.now() + parseInt(data.duration) * 24 * 60 * 60 * 1000)) : null
-      };
+      if (editingItem) {
+        const updatedItem: any = {
+          title: data.title,
+          description: data.description,
+          listingType: data.listingType,
+          category: data.category,
+          images: [data.image],
+        };
 
-      await addDoc(collection(db, 'items'), newItem);
+        if (data.listingType === 'buy-now') {
+          updatedItem.price = parseFloat(data.price);
+          updatedItem.currentBid = null;
+        } else {
+          updatedItem.currentBid = parseFloat(data.startingBid);
+          updatedItem.price = null;
+          // Only update endTime if it's a new duration or wasn't set
+          updatedItem.endTime = Timestamp.fromDate(new Date(Date.now() + parseInt(data.duration) * 24 * 60 * 60 * 1000));
+        }
+
+        await updateDoc(doc(db, 'items', editingItem.id), updatedItem);
+        setEditingItem(null);
+        alert("Artifact updated successfully.");
+      } else {
+        const newItem = {
+          title: data.title,
+          description: data.description,
+          listingType: data.listingType,
+          category: data.category,
+          price: data.listingType === 'buy-now' ? parseFloat(data.price) : null,
+          currentBid: data.listingType === 'auction' ? parseFloat(data.startingBid) : null,
+          bidCount: 0,
+          images: [data.image],
+          sellerUid: user.uid,
+          sellerName: user.displayName,
+          status: 'active',
+          createdAt: serverTimestamp(),
+          endTime: data.listingType === 'auction' ? Timestamp.fromDate(new Date(Date.now() + parseInt(data.duration) * 24 * 60 * 60 * 1000)) : null
+        };
+
+        await addDoc(collection(db, 'items'), newItem);
+      }
       setView('marketplace');
     } catch (error) {
-      console.error("Error listing item:", error);
+      console.error("Error listing/updating item:", error);
+      alert("Failed to process your request. Please try again.");
     }
   };
 
@@ -3266,12 +3770,12 @@ export default function App() {
     
     const initialItems = [
       {
-        title: "Rare Blue Diamond Pendant",
-        description: "A breathtaking 5-carat deep blue diamond set in platinum. This exceptional piece features a brilliant cut and unmatched clarity, originating from the historic Golconda mines.",
-        price: 125000,
+        title: "18th Century French Rococo Armchair",
+        description: "An exquisite example of 18th-century French craftsmanship, this Rococo armchair features hand-carved walnut detailing and original silk damask upholstery. Sourced from a private estate in Lyon.",
+        price: 12500,
         listingType: "buy-now",
-        category: "Jewelry",
-        images: ["https://picsum.photos/seed/antique-diamond/800/1000"],
+        category: "Furniture",
+        images: ["https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=1000"],
         sellerUid: user.uid,
         sellerName: "Elite Curator",
         status: "active",
@@ -3279,12 +3783,12 @@ export default function App() {
         bidCount: 0
       },
       {
-        title: "Qing Dynasty Blue & White Vase",
-        description: "An exquisite porcelain vase from the Qianlong period. Decorated with intricate cobalt blue floral motifs on a pristine white background. Authenticated by leading experts.",
+        title: "Patek Philippe Perpetual Calendar 1952",
+        description: "A legendary timepiece of unparalleled rarity. This 1952 Patek Philippe features a perpetual calendar, moon phase indicator, and an 18k yellow gold case. Fully serviced and authenticated.",
         currentBid: 45000,
         listingType: "auction",
-        category: "Art",
-        images: ["https://picsum.photos/seed/antique-vase/800/1000"],
+        category: "Timepieces",
+        images: ["https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80&w=1000"],
         sellerUid: user.uid,
         sellerName: "Elite Curator",
         status: "active",
@@ -3293,12 +3797,12 @@ export default function App() {
         endTime: Timestamp.fromDate(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000))
       },
       {
-        title: "Sapphire & Pearl Victorian Tiara",
-        description: "A stunning royal tiara featuring deep blue sapphires and natural saltwater pearls. Crafted in the mid-19th century for a European noble family.",
-        currentBid: 85000,
+        title: "Imperial Ming Dynasty Celadon Vase",
+        description: "A breathtaking Ming Dynasty vase with a rare sea-foam celadon glaze. Features intricate lotus scroll motifs and the official imperial kiln mark. A centerpiece for any serious collection.",
+        currentBid: 28000,
         listingType: "auction",
-        category: "Jewelry",
-        images: ["https://picsum.photos/seed/antique-tiara/800/1000"],
+        category: "Fine Art",
+        images: ["https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?auto=format&fit=crop&q=80&w=1000"],
         sellerUid: user.uid,
         sellerName: "Elite Curator",
         status: "active",
@@ -3373,7 +3877,119 @@ export default function App() {
                 featuredImageUrl={featuredImageUrl}
                 loading={loading}
               />
+
+              {/* Category Section */}
+              <section className="py-20 px-4 md:px-8 max-w-7xl mx-auto">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+                      {['Fine Art', 'Timepieces', 'Furniture', 'Jewelry', 'Manuscripts'].map((cat, index) => (
+                        <motion.div
+                          key={cat}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          onClick={() => {
+                            setFilterType(cat);
+                            setView('marketplace');
+                          }}
+                          className="aspect-square bg-white border border-black/5 flex flex-col items-center justify-center p-6 cursor-pointer group hover:border-primary transition-all duration-500 shadow-sm hover:shadow-xl"
+                        >
+                          <h4 className="text-xl md:text-2xl font-black text-primary uppercase tracking-tighter mb-2 group-hover:scale-110 transition-transform duration-500 text-center">{cat}</h4>
+                          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">Elite Selection</span>
+                        </motion.div>
+                      ))}
+                </div>
+              </section>
               
+              <section className="py-32 px-8 max-w-7xl mx-auto grid md:grid-cols-3 gap-16 md:gap-24">
+                {[
+                  { icon: (props: any) => (
+                    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="2" y1="12" x2="22" y2="12" />
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg>
+                  ), title: "Global Selection", desc: "Premium clothing sourced from sellers and boutiques around the world." },
+                  { icon: (props: any) => (
+                    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                      <line x1="7" y1="7" x2="7.01" y2="7" />
+                    </svg>
+                  ), title: "Secure Payments", desc: "We accept Crypto, USD, and PayPal with secure protection for every transaction." },
+                  { icon: (props: any) => (
+                    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      <path d="m9 12 2 2 4-4" />
+                    </svg>
+                  ), title: "Verified Sellers", desc: "Every seller is verified to ensure quality and accurate representation of clothing." }
+                ].map((feature, index) => (
+                  <motion.div 
+                    key={feature.title}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="text-center space-y-8 group"
+                  >
+                    <div className="w-16 h-16 bg-primary/5 text-primary flex items-center justify-center rounded-full mx-auto group-hover:bg-primary group-hover:text-white transition-all duration-500">
+                      <feature.icon className="w-8 h-8" />
+                    </div>
+                    <div className="space-y-4">
+                      <h4 className="text-2xl font-black uppercase tracking-tight text-primary">{feature.title}</h4>
+                      <p className="text-zinc-500 text-base leading-relaxed max-w-xs mx-auto">{feature.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </section>
+
+              {/* Stats Section (Blue Bar) */}
+              <section className="bg-[#2563eb] py-24 px-8">
+                <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-12 md:gap-24 text-center">
+                  {[
+                    { label: "Listings", value: "500+" },
+                    { label: "Sellers", value: "200+" },
+                    { label: "Avg. Rating", value: "4.9" },
+                    { label: "Countries", value: "50+" }
+                  ].map((stat, index) => (
+                    <motion.div
+                      key={stat.label}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="text-white space-y-2"
+                    >
+                      <div className="flex justify-center mb-4">
+                        {index === 0 && <ShoppingBag className="w-8 h-8 opacity-50" />}
+                        {index === 1 && <UserIcon className="w-8 h-8 opacity-50" />}
+                        {index === 2 && <Star className="w-8 h-8 opacity-50" />}
+                        {index === 3 && <svg className="w-8 h-8 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>}
+                      </div>
+                      <h4 className="text-5xl font-black tracking-tighter">{stat.value}</h4>
+                      <p className="text-sm font-black uppercase tracking-[0.3em] opacity-70">{stat.label}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Newsletter Section */}
+              <section className="py-32 px-8 bg-white border-b border-black/5">
+                <div className="max-w-3xl mx-auto text-center space-y-12">
+                  <div className="w-16 h-16 bg-primary/5 text-primary flex items-center justify-center rounded-full mx-auto">
+                    <Send className="w-8 h-8" />
+                  </div>
+                  <div className="space-y-6">
+                    <h3 className="text-4xl font-black text-primary uppercase tracking-tighter">Stay in the Loop</h3>
+                    <p className="text-zinc-500 text-lg">Get the latest drops, exclusive deals, and style tips delivered to your inbox.</p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
+                    <input 
+                      type="email" 
+                      placeholder="Enter your email address" 
+                      className="flex-grow px-8 py-5 bg-zinc-50 border border-black/5 rounded-none focus:outline-none focus:border-primary transition-colors"
+                    />
+                    <button className="btn-primary px-12 py-5 whitespace-nowrap">Subscribe</button>
+                  </div>
+                </div>
+              </section>
+
               <section className="py-40 px-8 max-w-7xl mx-auto">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-12 mb-24">
                   <motion.div 
@@ -3423,83 +4039,8 @@ export default function App() {
                 </div>
               </section>
 
-              <section className="py-40 px-6 bg-paper overflow-hidden">
-                <div className="max-w-7xl mx-auto">
-                  <div className="max-w-3xl mx-auto text-center space-y-12">
-                    <motion.div 
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      className="space-y-12"
-                    >
-                      <span className="text-primary text-base font-black tracking-[0.6em] uppercase">The Strawboss Standard</span>
-                      <h3 className="text-4xl text-ink font-serif font-black uppercase tracking-tighter">
-                        STRAWBOSS <br />
-                        ARCHIVES
-                      </h3>
-                      <p className="text-xl text-ink/80 max-w-2xl mx-auto font-serif italic leading-relaxed">
-                        Our experts traverse the globe to source artifacts of exceptional historical significance and aesthetic brilliance.
-                      </p>
-                      <div className="grid grid-cols-2 gap-12 pt-8 max-w-lg mx-auto">
-                        <div className="space-y-4">
-                          <h4 className="text-4xl text-ink font-serif font-black tracking-tighter">98%</h4>
-                          <p className="text-base uppercase tracking-widest text-ink/60 font-black">Authentication Rate</p>
-                        </div>
-                        <div className="space-y-4">
-                          <h4 className="text-4xl text-ink font-serif font-black tracking-tighter">12k+</h4>
-                          <p className="text-base uppercase tracking-widest text-ink/60 font-black">Elite Members</p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  </div>
-                </div>
-              </section>
-
               <ReviewsSection />
               <MembershipSection onApply={() => setShowMembershipModal(true)} />
-
-              <section className="bg-paper text-white py-40 px-8 overflow-hidden relative">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5" />
-                <div className="max-w-7xl mx-auto text-center relative z-10">
-                  <span className="text-primary uppercase tracking-[0.6em] text-base font-black mb-12 block">World Class Collections</span>
-                  <div className="flex flex-wrap justify-center gap-x-24 gap-y-16">
-                    {['Victorian Era', 'Ancient Greek', 'Renaissance Art', 'Edo Period', 'Art Deco'].map((era, index) => (
-                      <motion.div 
-                        key={era} 
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="group cursor-pointer"
-                      >
-                        <h3 className="text-3xl mb-4 group-hover:text-primary transition-all duration-500 font-serif font-black tracking-tighter uppercase">{era}</h3>
-                        <span className="text-base uppercase tracking-[0.4em] text-white/70 font-black group-hover:text-white/90 transition-colors">Premium Selection</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              </section>
-
-              <section className="py-40 px-8 max-w-7xl mx-auto grid md:grid-cols-3 gap-24">
-                {[
-                  { icon: Gavel, title: "Fair Auctions", desc: "Transparent bidding processes with extended time guarantees to prevent sniping and ensure true market value." },
-                  { icon: CreditCard, title: "Secure Payments", desc: "We accept Crypto, USD, and PayPal with multi-signature escrow protection for every high-value transaction." },
-                  { icon: ShieldCheck, title: "Verified Sellers", desc: "Every seller undergoes rigorous vetting to ensure authenticity, provenance, and accurate representation of artifacts." }
-                ].map((feature, index) => (
-                  <motion.div 
-                    key={feature.title}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="space-y-8 group"
-                  >
-                    <div className="w-16 h-16 bg-ink flex items-center justify-center rotate-45 shadow-2xl shadow-primary/20 group-hover:bg-primary transition-colors duration-500">
-                      <feature.icon className="text-white w-8 h-8 -rotate-45" />
-                    </div>
-                    <h4 className="text-3xl tracking-tight text-ink font-serif font-black uppercase">{feature.title}</h4>
-                    <p className="text-ink/90 text-base font-serif italic leading-relaxed">{feature.desc}</p>
-                  </motion.div>
-                ))}
-              </section>
 
               {user?.email === 'smubasshir532@gmail.com' && items.length === 0 && (
                 <div className="py-20 text-center">
@@ -3535,7 +4076,7 @@ export default function App() {
             </>
           )}
 
-          {view === 'about' && <AboutSection featuredImageUrl={featuredImageUrl} />}
+          {view === 'about' && <AboutSection />}
           {view === 'membership' && <MembershipSection onApply={() => setShowMembershipModal(true)} />}
 
           {view === 'dashboard' && userProfile && (
@@ -3556,6 +4097,10 @@ export default function App() {
               onLeaveReview={(item) => {
                 setShowReviewModal(item);
               }}
+              onEditItem={(item) => {
+                setEditingItem(item);
+                setView('sell');
+              }}
               onUpdateProfile={handleUpdateProfile}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
@@ -3564,8 +4109,21 @@ export default function App() {
 
           {view === 'sell' && (
             <ConsignmentForm 
-              onCancel={() => setView('marketplace')} 
+              onCancel={() => {
+                setEditingItem(null);
+                setView('marketplace');
+              }} 
               onSubmit={handleConsign}
+              initialData={editingItem ? {
+                title: editingItem.title,
+                description: editingItem.description,
+                listingType: editingItem.listingType,
+                category: editingItem.category,
+                price: editingItem.price?.toString() || '',
+                startingBid: editingItem.currentBid?.toString() || '',
+                duration: '7',
+                image: editingItem.images[0]
+              } : undefined}
             />
           )}
 
@@ -3617,24 +4175,13 @@ export default function App() {
                 <X className="w-6 h-6 md:w-8 md:h-8" />
               </button>
               <ConsignmentForm 
-                onCancel={() => setShowConsignModal(false)} 
+                onCancel={() => {
+                  setEditingItem(null);
+                  setShowConsignModal(false);
+                }} 
                 onSubmit={async (data) => {
-                  if (editingItem) {
-                    try {
-                      await updateDoc(doc(db, 'items', editingItem.id), {
-                        ...data,
-                        price: data.listingType === 'buy-now' ? parseFloat(data.price) : null,
-                        currentBid: data.listingType === 'auction' ? parseFloat(data.startingBid) : null,
-                        images: [data.image]
-                      });
-                      setShowConsignModal(false);
-                    } catch (error) {
-                      console.error("Error updating item:", error);
-                    }
-                  } else {
-                    await handleConsign(data);
-                    setShowConsignModal(false);
-                  }
+                  await handleConsign(data);
+                  setShowConsignModal(false);
                 }}
                 initialData={editingItem ? {
                   title: editingItem.title,

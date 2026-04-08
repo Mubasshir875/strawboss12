@@ -2,17 +2,17 @@ import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
-export async function generateArtifactDescription(title: string, category: string, listingType: string) {
+export async function generateItemDescription(title: string, category: string, listingType: string) {
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: `Generate a detailed, engaging, and elite description for an auction item.
+      contents: `Generate a detailed, engaging, and elite description for a high-fashion item.
       
-      Artifact Title: ${title}
+      Item Title: ${title}
       Category: ${category}
       Listing Type: ${listingType === 'auction' ? 'Public Auction' : 'Private Treaty'}
       
-      The description should be sophisticated, highlighting the historical significance, craftsmanship, and rarity. Use an elite, archival tone suitable for a high-end antiquities marketplace like "Strawboss Archives". Keep it around 150-200 words.`,
+      The description should be sophisticated, highlighting the design, craftsmanship, material quality, and brand heritage. Use an elite, minimalist, and archival tone suitable for a high-end fashion marketplace like "Strawboss Fashion Marketplace". Keep it around 100-150 words.`,
     });
 
     return response.text;
