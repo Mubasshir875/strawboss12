@@ -24,7 +24,7 @@ import {
 } from 'firebase/firestore';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth, db, signInWithGoogle, logout } from './firebase';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
   Plus, 
@@ -1824,9 +1824,14 @@ const UserDashboard = ({
     const key = `recentlyViewed_${userProfile.uid}`;
     const stored = localStorage.getItem(key);
     if (stored) {
-      const ids = JSON.parse(stored) as string[];
-      const viewed = ids.map(id => items.find(i => i.id === id)).filter(Boolean) as AuctionItem[];
-      setRecentlyViewed(viewed);
+      try {
+        const ids = JSON.parse(stored) as string[];
+        const viewed = ids.map(id => items.find(i => i.id === id)).filter(Boolean) as AuctionItem[];
+        setRecentlyViewed(viewed);
+      } catch (e) {
+        console.error("Failed to parse recently viewed items", e);
+        localStorage.removeItem(key);
+      }
     }
   }, [userProfile.uid, items]);
 
@@ -4024,9 +4029,14 @@ export default function App() {
           // Attempt fallback from localStorage
           const cached = localStorage.getItem(`profile_${user.uid}`);
           if (cached) {
-            const data = JSON.parse(cached);
-            setUserProfile(data);
-            setFavorites(data.favorites || []);
+            try {
+              const data = JSON.parse(cached);
+              setUserProfile(data);
+              setFavorites(data.favorites || []);
+            } catch (e) {
+              console.error("Failed to parse cached profile", e);
+              localStorage.removeItem(`profile_${user.uid}`);
+            }
           } else {
             // Minimal fallback from Auth
             setUserProfile({
@@ -4079,7 +4089,13 @@ export default function App() {
         console.warn('Quota limit exceeded for items. Using cached data.');
         const cached = localStorage.getItem('cached_items');
         if (cached) {
-          setItems(JSON.parse(cached));
+          try {
+            setItems(JSON.parse(cached));
+          } catch (e) {
+            console.error("Failed to parse cached items", e);
+            localStorage.removeItem('cached_items');
+            setItems(SAMPLE_ITEMS);
+          }
         } else {
           // Last resort: Sample Data
           setItems(SAMPLE_ITEMS);
