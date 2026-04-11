@@ -57,6 +57,8 @@ app.post("/api/send-email", async (req, res) => {
 
 // Background Task: Check for items ending soon
 const checkEndingSoon = async () => {
+  if (!process.env.RESEND_API_KEY) return;
+
   try {
     const now = Timestamp.now();
     const tenMinutesFromNow = new Timestamp(now.seconds + 600, now.nanoseconds);
@@ -70,24 +72,22 @@ const checkEndingSoon = async () => {
     );
 
     const snapshot = await getDocs(q);
+    if (snapshot.empty) return;
+    
+    // Get all users who have favorites (much more efficient than reading all users)
+    const usersSnapshot = await getDocs(query(collection(db, "users"), where("favorites", "!=", [])));
     
     for (const itemDoc of snapshot.docs) {
       const item = itemDoc.data();
       const itemId = itemDoc.id;
 
-      // Get users watching this item
-      // Note: We need to iterate through all users to find who has this item in their watchlist
-      // In a real app, you'd have a better index or a separate collection for watchers
-      const usersSnapshot = await getDocs(collection(db, "users"));
-      
       for (const userDoc of usersSnapshot.docs) {
-        const userId = userDoc.id;
         const user = userDoc.data();
+        const favorites = user.favorites || [];
         
-        const watchlistDoc = await getDoc(doc(db, `users/${userId}/watchlist`, itemId));
-        if (watchlistDoc.exists()) {
+        if (favorites.includes(itemId)) {
           // Send email
-          if (user.email && process.env.RESEND_API_KEY) {
+          if (user.email) {
             try {
               const resendClient = getResend();
               await resendClient.emails.send({
@@ -115,9 +115,10 @@ const checkEndingSoon = async () => {
   }
 };
 
-// Run background task every minute
+// Run background task every 30 minutes instead of every 5 minutes to save quota
+// Or comment out to disable completely if quota is extremely tight
 if (process.env.NODE_ENV !== "test") {
-  setInterval(checkEndingSoon, 60000);
+  // setInterval(checkEndingSoon, 1800000); 
 }
 
 async function startServer() {

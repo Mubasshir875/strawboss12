@@ -37,7 +37,9 @@
         "createdAt": { "type": "string", "format": "date-time" },
         "status": { "type": "string", "enum": ["active", "sold", "ended"] },
         "shippingStatus": { "type": "string", "enum": ["pending", "shipped", "delivered"] },
-        "endingSoonEmailSent": { "type": "boolean" }
+        "endingSoonEmailSent": { "type": "boolean" },
+        "aiVideoUrl": { "type": "string", "format": "uri" },
+        "aiVideoPrompt": { "type": "string" }
       },
       "required": ["title", "listingType", "sellerUid", "status"]
     },
@@ -93,6 +95,14 @@
     "/users/{userId}/watchlist/{itemId}": {
       "schema": "AuctionItem",
       "description": "User's watchlist items"
+    },
+    "/settings/{settingId}": {
+      "schema": { "type": "object" },
+      "description": "Global site settings"
+    },
+    "/test/{docId}": {
+      "schema": { "type": "object" },
+      "description": "Connection test collection"
     }
   }
 }
