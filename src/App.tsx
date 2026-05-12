@@ -48,6 +48,8 @@ import {
   Trash2,
   Edit,
   Edit3,
+  Printer,
+  FileText,
   Menu,
   ArrowUpRight,
   Heart,
@@ -237,19 +239,16 @@ const SAMPLE_ITEMS: AuctionItem[] = [
 ];
 
 const ItemCardSkeleton = () => (
-  <div className="bg-surface border border-primary/5 overflow-hidden rounded-[2rem] shadow-sm">
-    <div className="aspect-[3/4] bg-primary/5 animate-pulse" />
-    <div className="p-6 space-y-4">
-      <div className="space-y-2">
-        <Skeleton className="h-3 w-20" />
-        <Skeleton className="h-6 w-full" />
-      </div>
-      <div className="pt-4 border-t border-primary/5 flex justify-between items-end">
+  <div className="bg-white border border-black/[0.03] overflow-hidden shadow-sm aspect-[4/5] flex flex-col">
+    <div className="flex-1 bg-black/[0.03] animate-pulse" />
+    <div className="p-8 space-y-4">
+      <Skeleton className="h-2 w-1/4" />
+      <Skeleton className="h-8 w-3/4" />
+      <div className="pt-4 border-t border-black/[0.03] flex justify-between items-end">
         <div className="space-y-2">
           <Skeleton className="h-2 w-16" />
           <Skeleton className="h-6 w-24" />
         </div>
-        <Skeleton className="h-10 w-20 rounded-none" />
       </div>
     </div>
   </div>
@@ -716,7 +715,7 @@ const Navbar = ({
     >
       {/* Top Announcement Bar */}
       <div className="bg-black text-white py-2 px-6 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] flex justify-between items-center">
-        <span>Est. 1924 | Premier Auction House</span>
+        <span>Est. 1992 | Premier Auction House</span>
         <span className="hidden md:block">Worldwide White-Glove Delivery</span>
         <span className="md:hidden">White-Glove Delivery</span>
       </div>
@@ -959,7 +958,7 @@ const Navbar = ({
 
             <div className="p-8 bg-zinc-50 border-t border-black/5">
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 text-center">
-                Est. 1924 | Strawboss Archives
+                Est. 1992 | Strawboss Archives
               </p>
             </div>
           </motion.div>
@@ -1021,7 +1020,7 @@ const Hero = ({ onExplore, onConsign, featuredImageUrl, loading, isAdmin }: { on
               <span className="italic font-extralight text-ink/40 lowercase">premier</span> AUCTION
             </h2>
             <p className="text-base md:text-2xl font-serif italic text-ink/80 max-w-xl leading-relaxed">
-              Established 1924. The global standard for authenticated elite auctions and private treaties. Acquire the world's most significant artifacts.
+              Established 1992. The global standard for authenticated elite auctions and private treaties. Acquire the world's most significant artifacts.
             </p>
           </div>
 
@@ -1170,30 +1169,7 @@ const CountdownTimer = ({ endTime }: { endTime: Timestamp }) => {
 };
 
 const ItemCard = ({ item, onClick, isFavorite, onToggleFavorite, onEdit }: { item: AuctionItem, onClick: () => void, isFavorite: boolean, onToggleFavorite: (e: React.MouseEvent) => void, onEdit?: (e: React.MouseEvent) => void }) => {
-  const [rotate, setRotate] = useState({ x: 0, y: 0 });
-
-  const isEndingSoon = useMemo(() => {
-    if (item.listingType !== 'auction' || !item.endTime || item.status !== 'active') return false;
-    const now = Date.now();
-    const end = getTimestampMillis(item.endTime);
-    const diff = end - now;
-    return diff > 0 && diff < 24 * 60 * 60 * 1000; // Less than 24 hours
-  }, [item]);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = (y - centerY) / 25;
-    const rotateY = (centerX - x) / 25;
-    setRotate({ x: rotateX, y: rotateY });
-  };
-
-  const handleMouseLeave = () => {
-    setRotate({ x: 0, y: 0 });
-  };
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <motion.div 
@@ -1201,148 +1177,108 @@ const ItemCard = ({ item, onClick, isFavorite, onToggleFavorite, onEdit }: { ite
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      animate={{ 
-        rotateX: rotate.x, 
-        rotateY: rotate.y,
-        y: rotate.x !== 0 ? -10 : 0
-      }}
-      transition={{ type: 'spring', stiffness: 150, damping: 20 }}
-      className="group bg-surface border border-primary/5 overflow-hidden cursor-pointer shadow-sm hover:shadow-[0_80px_160px_rgba(0,0,0,0.3)] transition-all duration-500 rounded-[2.5rem] perspective-[1000px]"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative bg-white border border-black/[0.03] overflow-hidden cursor-pointer shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] transition-all duration-700 rounded-none border-b-4 border-b-black/5"
       onClick={onClick}
     >
-      <div className="relative aspect-[3/4] overflow-hidden">
+      <div className="relative aspect-[4/5] overflow-hidden bg-[#f0f0f0]">
         <LazyImage 
-          src={(item.images && item.images[0]) || `https://picsum.photos/seed/antique-${item.id}/800/1000`} 
+          src={(item.images && item.images[0]) || `https://picsum.photos/seed/item-${item.id}/800/1000`} 
           alt={item.title}
-          imgClassName="img-fit group-hover:scale-110 transition-transform duration-[1.5s] ease-out"
+          imgClassName={cn(
+            "img-fit transition-transform duration-[2s] ease-out",
+            isHovered ? "scale-105" : "scale-100"
+          )}
         />
         
-        {/* Quick Action Button on Hover (Desktop) / Visible on Mobile */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 md:gap-4 opacity-0 lg:group-hover:opacity-100 transition-all duration-500 bg-primary/20 backdrop-blur-[4px] z-20">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-paper text-primary px-6 md:px-10 py-3 md:py-5 rounded-xl md:rounded-2xl text-[10px] md:text-sm font-black uppercase tracking-[0.2em] shadow-xl hover:bg-accent hover:text-white transition-colors w-[85%]"
-            onClick={(e) => {
-              e.stopPropagation();
-              onClick();
-            }}
-          >
-            {item.listingType === 'auction' ? 'Place Valuation' : 'Acquire Now'}
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={cn(
-              "px-6 md:px-10 py-3 md:py-5 rounded-xl md:rounded-2xl text-[10px] md:text-sm font-black uppercase tracking-[0.2em] shadow-xl transition-colors w-[85%]",
-              isFavorite ? "bg-accent text-white" : "bg-white/10 text-white backdrop-blur-md border border-white/20 hover:bg-white hover:text-primary"
-            )}
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleFavorite(e);
-            }}
-          >
-            {isFavorite ? 'Watching Piece' : 'Watch Piece'}
-          </motion.button>
+        {/* Floating Category Tag */}
+        <div className="absolute top-6 left-6 z-10 flex flex-col gap-1 items-start">
+          <span className="bg-black/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-[0.3em] px-3 py-1.5 shadow-xl">
+            {item.category}
+          </span>
+          {item.listingType === 'auction' ? (
+            <span className="bg-white/80 backdrop-blur-md text-black text-[8px] font-black uppercase tracking-[0.3em] px-3 py-1.5 shadow-xl border border-black/5">
+              Live Auction
+            </span>
+          ) : (
+            <span className="bg-white/80 backdrop-blur-md text-black text-[8px] font-black uppercase tracking-[0.3em] px-3 py-1.5 shadow-xl border border-black/5">
+              Private Treaty
+            </span>
+          )}
         </div>
 
-        {/* Mobile Quick Info Overlay (Visible only on mobile when not hovered) */}
-        <div className="lg:hidden absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-6 pt-12 z-10">
-          <div className="flex justify-between items-end">
-            <div className="space-y-1">
-              <p className="text-[8px] font-black text-white/60 uppercase tracking-widest">Current Valuation</p>
-              <p className="text-xl font-serif font-black text-white leading-none">
-                ${(item.currentBid || item.price || 0).toLocaleString()}
-              </p>
-            </div>
-            <div className="bg-accent text-white px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest">
-              {item.listingType === 'auction' ? 'Live' : 'Private'}
-            </div>
-          </div>
-        </div>
-        
-        <div className="absolute top-6 left-6 right-6 flex justify-between items-start z-30">
-          <div className="flex flex-col gap-2">
-            <div className="bg-paper/90 backdrop-blur-xl border border-primary/5 px-4 py-2 rounded-full shadow-lg w-fit">
-              <span className="text-[10px] font-black text-ink uppercase tracking-widest">
-                {item.listingType === 'auction' ? 'Live Auction' : 'Private Treaty'}
-              </span>
-            </div>
-            {isEndingSoon && (
-              <motion.div 
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                className="bg-accent text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 w-fit"
-              >
-                <Clock className="w-3 h-3 animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Ending Soon</span>
-              </motion.div>
-            )}
-          </div>
-          <div className="flex items-center gap-3 md:gap-4">
-            <button 
-              onClick={onToggleFavorite}
-              className={cn(
-                "w-10 h-10 rounded-full backdrop-blur-xl border border-white/20 flex items-center justify-center transition-all duration-500 hover:scale-110",
-                isFavorite ? "bg-accent text-white border-accent" : "bg-black/40 text-white hover:bg-white hover:text-primary"
-              )}
-            >
-              <Heart className={cn("w-4 h-4", isFavorite && "fill-current")} />
-            </button>
-            {onEdit && (
-              <button 
-                onClick={onEdit}
-                className="w-10 h-10 rounded-full backdrop-blur-xl border border-white/20 bg-black/40 text-white flex items-center justify-center transition-all duration-500 hover:scale-110 hover:bg-white hover:text-primary"
-              >
-                <Edit className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        </div>
+        {/* Favorite Button */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFavorite(e);
+          }}
+          className={cn(
+            "absolute top-6 right-6 z-20 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500",
+            isFavorite ? "bg-black text-white" : "bg-white/40 hover:bg-white text-black backdrop-blur-md border border-black/10"
+          )}
+        >
+          <Heart className={cn("w-4 h-4", isFavorite && "fill-current")} />
+        </motion.button>
 
-        <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-700 z-30">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              <div className={cn("w-2 h-2 rounded-full", item.listingType === 'auction' ? "bg-accent animate-pulse" : "bg-green-400")} />
-              <span className="text-xs uppercase tracking-[0.3em] font-black text-white">
-                {item.listingType === 'auction' ? 'Accepting Valuations' : 'Available Immediately'}
-              </span>
-            </div>
-            {item.listingType === 'auction' && item.endTime && item.status === 'active' && (
-              <CountdownTimer endTime={item.endTime} />
-            )}
+        {/* View Details Overlay */}
+        <div className={cn(
+          "absolute inset-0 bg-black/5 transition-opacity duration-700 flex items-center justify-center",
+          isHovered ? "opacity-100" : "opacity-0"
+        )}>
+          <div className="w-16 h-16 rounded-full border border-white/30 flex items-center justify-center text-white backdrop-blur-sm">
+             <Plus className="w-6 h-6" />
           </div>
         </div>
       </div>
-      
-      <div className="p-4 md:p-8 space-y-4 md:space-y-6">
-        <div className="space-y-1 md:space-y-2">
-          <div className="flex items-center gap-2 md:gap-3">
-            <span className="text-[8px] md:text-[10px] uppercase tracking-[0.4em] font-black text-accent">{item.category}</span>
-            <span className="w-2 md:w-4 h-[1px] bg-primary/10" />
-          </div>
-          <h4 className="text-sm md:text-xl font-serif font-black text-primary leading-tight group-hover:text-accent transition-colors duration-500 line-clamp-1">{item.title}</h4>
-        </div>
+
+      <div className="p-4 md:p-8 space-y-4 md:space-y-6 relative bg-white">
+        {/* Decorative corner mark */}
+        <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-black/5 pointer-events-none" />
         
-        <div className="flex items-end justify-between pt-2 md:pt-6 border-t border-primary/5">
-          <div className="space-y-0.5 md:space-y-1">
-            <span className="text-[6px] md:text-[10px] uppercase tracking-[0.4em] font-black text-ink/40 block">
-              {item.listingType === 'auction' ? 'Valuation' : 'Price'}
-            </span>
-            <div className="flex items-baseline gap-0.5 md:gap-1">
-              <span className="text-sm md:text-2xl font-black text-accent">$</span>
-              <span className="text-lg md:text-4xl font-serif font-black text-primary tracking-tighter">
-                {(item.listingType === 'auction' ? item.currentBid : item.price)?.toLocaleString()}
-              </span>
-            </div>
+        <div className="space-y-1 md:space-y-2">
+          <div className="flex items-center gap-2">
+             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-black/30">Archives</span>
+             <span className="w-4 h-[1px] bg-black/10" />
           </div>
-          
-          <div className="w-8 h-8 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-primary/5 flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-all duration-500">
-            <ArrowUpRight className="w-4 h-4 md:w-5 h-5" />
+          <h3 className="text-lg md:text-2xl font-serif font-medium text-black tracking-tight leading-tight group-hover:italic transition-all duration-500 truncate">
+            {item.title}
+          </h3>
+        </div>
+
+        <div className="flex justify-between items-end pt-4 border-t border-black/[0.03]">
+          <div className="space-y-1">
+            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-black/40 block">
+              {item.listingType === 'auction' ? 'Current Valuation' : 'Price / Treaty'}
+            </span>
+            <span className="text-xl font-display font-medium text-black">
+              ${(item.listingType === 'auction' ? (item.currentBid || item.price) : item.price)?.toLocaleString()}
+            </span>
+          </div>
+
+          <div className="flex flex-col items-end gap-2">
+             {item.listingType === 'auction' && (
+               <div className="flex items-center gap-2 px-3 py-1 bg-zinc-50 border border-black/5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-[8px] font-black uppercase tracking-widest text-black/50">{item.bidCount} Bids</span>
+               </div>
+             )}
+             <ChevronRight className="w-4 h-4 text-black/20 group-hover:text-black group-hover:translate-x-1 transition-all duration-500" />
           </div>
         </div>
+
+        {onEdit && (
+          <button 
+            onClick={onEdit}
+            className="absolute -top-4 right-8 w-8 h-8 bg-black text-white rounded-none flex items-center justify-center shadow-2xl hover:scale-110 transition-transform"
+          >
+            <Edit3 className="w-3 h-3" />
+          </button>
+        )}
       </div>
     </motion.div>
   );
@@ -1451,73 +1387,133 @@ const MembershipSection = ({ onApply }: { onApply: () => void }) => (
   </section>
 );
 
-const Marketplace = ({ 
+const CatalogPrintView = ({ items }: { items: AuctionItem[] }) => (
+  <div className="print-only p-12 bg-white text-black min-h-screen">
+    <div className="flex justify-between items-start border-b-2 border-black pb-8 mb-12">
+      <div className="space-y-4">
+        <h1 className="text-5xl font-serif uppercase tracking-tighter leading-none">Strawboss <br/>Archives</h1>
+        <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40">Curated Acquisition Catalog</p>
+      </div>
+      <div className="text-right flex flex-col items-end gap-4">
+        <div className="space-y-1">
+          <p className="text-[10px] font-black uppercase tracking-widest">{new Date().toLocaleDateString()}</p>
+          <p className="text-[8px] font-sans opacity-40 uppercase tracking-[0.1em]">Strawboss Authenticated Record</p>
+        </div>
+        <div className="w-16 h-16 border border-black/10 flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-black/5 rounded-full" />
+        </div>
+      </div>
+    </div>
+
+    <div className="grid grid-cols-2 gap-x-12 gap-y-16">
+      {items.map((item, index) => (
+        <div key={item.id} className={cn("space-y-6 pb-12 border-b border-black/5", (index + 1) % 4 === 0 && "page-break")}>
+          <div className="aspect-[4/5] bg-[#f7f7f7] overflow-hidden flex items-center justify-center p-8">
+             <img src={item.images?.[0]} alt={item.title} className="max-w-full max-h-full object-contain shadow-2xl" />
+          </div>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] px-3 py-1.5 bg-black text-white">{item.category}</span>
+              <span className="text-[8px] font-mono text-black/40">LOT NO. {item.id.slice(-6).toUpperCase()}</span>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-serif italic text-black leading-tight">{item.title}</h3>
+              <p className="text-[10px] text-black/50 leading-relaxed font-serif line-clamp-4">{item.description}</p>
+            </div>
+            <div className="pt-6 border-t border-black/10 flex justify-between items-baseline">
+              <div>
+                <p className="text-[8px] font-black uppercase tracking-widest text-black/30 mb-1">Estimated Value</p>
+                <p className="text-2xl font-display font-medium text-black">${(item.currentBid || item.price)?.toLocaleString()}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-[8px] font-black uppercase tracking-[0.2em] text-black/40 italic">Signature Piece</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div className="mt-auto pt-24 pb-8 border-t-2 border-black flex justify-between items-center text-[9px] font-black uppercase tracking-[0.5em]">
+      <span>© 2026 Strawboss Estate acquisitions</span>
+      <span className="opacity-20 font-mono tracking-normal">ST-CAT-{Math.random().toString(36).substring(7).toUpperCase()}</span>
+    </div>
+  </div>
+);
+
+const Archives = ({ 
   items, 
   onItemClick, 
-  searchQuery, 
-  setSearchQuery, 
   filterType, 
-  setFilterType,
-  favorites,
-  onToggleFavorite,
-  totalItemsCount,
-  onSeed,
-  onRefresh,
-  user,
-  loading
-}: { 
-  items: AuctionItem[], 
-  onItemClick: (item: AuctionItem) => void,
-  searchQuery: string,
-  setSearchQuery: (s: string) => void,
-  filterType: string,
-  setFilterType: (f: string) => void,
-  favorites: string[],
-  onToggleFavorite: (id: string, e: React.MouseEvent) => void,
-  totalItemsCount: number,
-  onSeed: () => void,
-  onRefresh: () => void,
-  user: User | null,
-  loading?: boolean
-}) => {
-  const [sortBy, setSortBy] = useState<'newest' | 'price-low' | 'price-high'>('newest');
+  setFilterType, 
+  onToggleFavorite, 
+  favorites, 
+  onRefresh, 
+  loading, 
+  searchQuery, 
+  setSearchQuery,
+  sortBy,
+  setSortBy,
+  user
+}: any) => {
+  const filteredItems = useMemo(() => {
+    let result = items;
+    if (filterType !== 'all') {
+      if (filterType === 'Trending') {
+        result = items.filter((i: AuctionItem) => i.bidCount > 5);
+      } else {
+        result = items.filter((i: AuctionItem) => i.category === filterType);
+      }
+    }
+    if (searchQuery) {
+      result = result.filter((i: AuctionItem) => 
+        i.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        i.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    return result;
+  }, [items, filterType, searchQuery]);
 
   const sortedItems = useMemo(() => {
-    return [...items].sort((a, b) => {
-      if (sortBy === 'price-low') return (a.price || a.currentBid || 0) - (b.price || b.currentBid || 0);
-      if (sortBy === 'price-high') return (b.price || b.currentBid || 0) - (a.price || a.currentBid || 0);
-      
-      const timeA = getTimestampMillis(a.createdAt);
-      const timeB = getTimestampMillis(b.createdAt);
-      return timeB - timeA;
-    });
-  }, [items, sortBy]);
+    const list = [...filteredItems];
+    if (sortBy === 'price-low') {
+      list.sort((a, b) => (a.price || a.currentBid || 0) - (b.price || b.currentBid || 0));
+    } else if (sortBy === 'price-high') {
+      list.sort((a, b) => (b.price || b.currentBid || 0) - (a.price || a.currentBid || 0));
+    } else if (sortBy === 'newest') {
+      list.sort((a, b) => getTimestampMillis(b.createdAt) - getTimestampMillis(a.createdAt));
+    }
+    return list;
+  }, [filteredItems, sortBy]);
 
   return (
-    <section className="min-h-screen py-24 md:py-48 px-4 md:px-12 bg-paper">
-      <div className="max-w-[1800px] mx-auto">
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 mb-16 md:mb-32">
-          <div className="space-y-6 md:space-y-8">
+    <section className="relative min-h-screen pt-16 md:pt-40 pb-24 md:pb-40 visible-grid">
+      <div className="max-w-[1500px] mx-auto px-4 md:px-6 space-y-12 md:space-y-24">
+        
+        {/* Gallery Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 md:gap-12">
+          <div className="space-y-6 md:space-y-10">
             <div className="flex items-center gap-4">
-              <span className="w-12 h-[1px] bg-black" />
-              <span className="text-base font-black uppercase tracking-[0.6em] text-black">Global Catalogues</span>
+              <span className="w-12 md:w-16 h-[1px] bg-black" />
+              <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.6em] text-black">Established archives</span>
             </div>
-            <h2 className="text-3xl font-serif font-black text-black tracking-tighter leading-[0.9] md:leading-[0.8] uppercase">
-              The <br/>Marketplace
+            <h2 className="text-4xl md:text-9xl font-serif font-medium text-black tracking-tighter leading-[0.85] uppercase">
+              The <br/>
+              <span className="italic font-light text-black/20">Marketplace</span>
             </h2>
           </div>
           
-          <div className="flex flex-wrap gap-4 md:gap-8 items-center">
-            <div className="flex overflow-x-auto pb-2 -mb-2 no-scrollbar lg:flex-wrap gap-2 md:gap-4 w-full lg:w-auto">
-              {['all', 'Trending', 'Fine Art', 'Timepieces', 'Furniture', 'Jewelry', 'Manuscripts'].map((cat) => (
+          <div className="flex flex-col gap-6 md:items-end">
+            <div className="flex items-center gap-2 md:gap-4 bg-white/50 backdrop-blur-md p-1 md:p-2 border border-black/5 overflow-x-auto no-scrollbar max-w-full">
+              {['all', 'Trending', 'Fine Art', 'Timepieces', 'Furniture', 'Jewelry'].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setFilterType(cat)}
                   className={cn(
-                    "px-4 md:px-8 py-2 md:py-4 text-xs md:text-base font-black tracking-[0.3em] uppercase transition-all duration-500 border-b-2 whitespace-nowrap",
+                    "px-4 md:px-6 py-2 md:py-3 text-[9px] md:text-[10px] font-black tracking-[0.3em] uppercase transition-all duration-500 whitespace-nowrap",
                     filterType === cat 
-                      ? "border-black text-black" 
-                      : "border-transparent text-black/30 hover:text-black hover:border-black/20"
+                      ? "bg-black text-white shadow-xl" 
+                      : "text-black/30 hover:text-black"
                   )}
                 >
                   {cat}
@@ -1525,36 +1521,56 @@ const Marketplace = ({
               ))}
             </div>
 
-            <div className="relative group">
-              <select 
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-transparent border-b-2 border-primary/10 px-4 py-4 text-base font-black tracking-[0.3em] uppercase appearance-none cursor-pointer pr-12 focus:border-accent outline-none transition-all text-primary"
-              >
-                <option value="newest">Newest First</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-              </select>
-              <ChevronRight className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 rotate-90 text-primary/20 group-hover:text-accent transition-colors" />
-            </div>
+            <div className="flex items-center gap-2 md:gap-4">
+              <div className="relative group">
+                <select 
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="bg-white border border-black/5 px-6 md:px-8 py-3 md:py-4 text-[9px] md:text-[10px] font-black tracking-[0.3em] uppercase appearance-none cursor-pointer pr-12 md:pr-16 focus:border-black outline-none transition-all text-black shadow-sm"
+                >
+                  <option value="newest">Newest First</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                </select>
+                <ChevronRight className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 rotate-90 text-black/20 pointer-events-none" />
+              </div>
 
-            <button 
-              onClick={onRefresh}
-              disabled={loading}
-              className="flex items-center gap-2 px-6 py-4 bg-primary/5 hover:bg-primary/10 rounded-full transition-colors text-primary disabled:opacity-50"
-            >
-              <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
-              <span className="text-xs font-black uppercase tracking-widest">Refresh</span>
-            </button>
+              <button 
+                onClick={() => {
+                  const curatedItems = items.filter(item => favorites.includes(item.id));
+                  if (curatedItems.length === 0) {
+                    alert('Please curate your collection by hearting some items first.');
+                    return;
+                  }
+                  window.print();
+                }}
+                className="px-6 md:px-8 py-3 md:py-4 bg-black text-white text-[9px] md:text-[10px] font-black tracking-[0.3em] uppercase flex items-center gap-3 transition-all hover:bg-zinc-800 shadow-xl no-print"
+              >
+                <Printer className="w-3 md:w-4 h-3 md:h-4" />
+                <span className="hidden md:inline">Print Catalog</span>
+              </button>
+
+              <button 
+                onClick={onRefresh}
+                disabled={loading}
+                className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-white border border-black/5 text-black hover:bg-black hover:text-white transition-all shadow-sm"
+              >
+                <RefreshCw className={cn("w-3 md:w-4 h-3 md:h-4", loading && "animate-spin")} />
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-16">
+        {/* Gallery Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-3 md:gap-x-8 gap-y-6 md:gap-y-16">
+          {/* Print View (Hidden on Screen) */}
+          <CatalogPrintView items={items.filter(item => favorites.includes(item.id))} />
+
           <AnimatePresence mode="popLayout">
             {loading ? (
               [...Array(8)].map((_, i) => <ItemCardSkeleton key={i} />)
             ) : sortedItems.length > 0 ? (
-              sortedItems.map((item) => (
+              sortedItems.map((item: AuctionItem) => (
                 <ItemCard 
                   key={item.id} 
                   item={item} 
@@ -1567,109 +1583,69 @@ const Marketplace = ({
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="col-span-full py-40 text-center space-y-8"
+                className="col-span-full py-40 md:py-60 text-center space-y-8 md:space-y-12"
               >
-                <div className="w-24 h-24 bg-primary/5 rounded-full flex items-center justify-center mx-auto">
-                  <Search className="w-10 h-10 text-primary/20" />
+                <div className="w-24 h-24 md:w-32 md:h-32 bg-black/[0.02] border border-black/[0.05] flex items-center justify-center mx-auto rounded-full">
+                  <Search className="w-8 h-8 md:w-10 md:h-10 text-black/10" />
                 </div>
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-serif font-black text-primary">No Artifacts Found</h3>
-                  <p className="text-sm text-primary/40 max-w-md mx-auto">The archives are currently empty or no items match your search criteria.</p>
+                <div className="space-y-4">
+                  <h3 className="text-2xl md:text-4xl font-serif font-medium text-black italic">No acquisitions found</h3>
+                  <p className="text-xs md:text-sm text-black/40 max-w-sm mx-auto font-medium tracking-wide">The archive filters have returned no matches. Try refining your curation.</p>
                 </div>
                 <div className="flex justify-center gap-4">
-                  <button onClick={onRefresh} className="btn-primary">Refresh Archives</button>
-                  {onSeed && <button onClick={onSeed} className="btn-outline">Seed Sample Data</button>}
+                  <button onClick={onRefresh} className="btn-primary px-8 md:px-12">Refresh</button>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* 3D UX Review Section */}
-        <div className="mt-32 md:mt-60 space-y-20">
-          <div className="text-center space-y-6">
-            <span className="text-accent text-base font-black tracking-[0.6em] uppercase">Elite Reviews</span>
-            <h3 className="text-4xl md:text-7xl font-serif font-black text-primary leading-none tracking-tighter uppercase">
-              The Member <br />
-              <span className="italic font-extralight text-ink/40 lowercase">experience</span>
+        {/* Elite Reviews Section */}
+        <div className="mt-40 md:mt-60 pt-24 md:pt-40 border-t border-black/[0.05] space-y-16 md:space-y-32">
+          <div className="flex flex-col md:flex-row items-baseline justify-between gap-8 md:gap-12">
+            <h3 className="text-4xl md:text-8xl font-serif font-medium text-black leading-[0.85] tracking-tighter uppercase max-w-2xl">
+              Signature <br />
+              <span className="italic font-light text-black/20">acquisitions</span>
             </h3>
+            <p className="max-w-sm text-black/60 font-serif italic text-base md:text-xl leading-relaxed">
+               "For those who understand that history isn't just kept, it's lived."
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 md:gap-12 perspective-[2000px]">
+          <div className="grid md:grid-cols-3 gap-1 grid-flow-dense border border-black/5 bg-black/5">
             {[
-              { name: "Alexander V.", role: "Fine Art Collector", text: "The 3D valuation interface is revolutionary. I can inspect every detail of the lot before placing my bid. Truly elite service." },
-              { name: "Elena S.", role: "Watch Enthusiast", text: "Strawboss has set a new standard for digital auctions. The real-time feedback and secure acquisition process are unmatched." },
-              { name: "Julian M.", role: "Historical Archivist", text: "Provenance is everything. The transparency and authentication rigor at Strawboss give me complete confidence in every acquisition." }
+              { name: "Alexander V.", role: "Curator", text: "The valuation precision here is unmatched. It's the only platform we trust for high-value private treaties." },
+              { name: "Elena S.", role: "Archivist", text: "Provenance is everything. Strawboss provides the transparency needed for institutional-grade collections." },
+              { name: "Julian M.", role: "Estate Liaison", text: "Global white-glove security combined with the ease of digital acquisition. Revolutionary." }
             ].map((review, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, rotateY: -30, y: 50 }}
-                whileInView={{ opacity: 1, rotateY: 0, y: 0 }}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                whileHover={{ rotateY: 10, rotateX: -5, y: -10 }}
-                transition={{ duration: 1, delay: i * 0.2, type: 'spring', stiffness: 100 }}
-                className="bg-surface p-10 md:p-12 rounded-[3rem] border border-primary/5 shadow-xl hover:shadow-[0_40px_80px_rgba(0,0,0,0.1)] space-y-8 group transition-all duration-500"
+                className="bg-white p-8 md:p-16 space-y-8 md:space-y-12 flex flex-col justify-between"
               >
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map(star => (
-                    <Star key={star} className="w-4 h-4 fill-accent text-accent" />
-                  ))}
+                <div className="space-y-6 md:space-y-8">
+                  <div className="flex gap-1.5 md:gap-2">
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <div key={star} className="w-1 md:w-1.5 h-1 md:h-1.5 bg-black" />
+                    ))}
+                  </div>
+                  <p className="text-xl md:text-2xl font-serif italic text-black leading-relaxed">
+                    "{review.text}"
+                  </p>
                 </div>
-                <p className="text-lg md:text-xl font-serif italic text-primary/70 leading-relaxed">
-                  "{review.text}"
-                </p>
-                <div className="pt-8 border-t border-primary/5 flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center font-black text-primary">
-                    {review.name[0]}
-                  </div>
+                <div className="pt-8 md:pt-12 border-t border-black/[0.05] flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-black uppercase tracking-widest text-primary">{review.name}</p>
-                    <p className="text-[10px] uppercase tracking-widest text-primary/40">{review.role}</p>
+                    <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] text-black leading-none">{review.name}</p>
+                    <p className="text-[8px] md:text-[9px] uppercase tracking-[0.2em] text-black/30 mt-2 italic font-serif">{review.role}</p>
                   </div>
+                  <span className="text-[9px] md:text-[10px] font-mono text-black/10">0{i+1}</span>
                 </div>
               </motion.div>
             ))}
           </div>
         </div>
-
-        {!loading && items.length === 0 && (
-          <div className="py-60 text-center space-y-12">
-            <div className="w-32 h-32 bg-primary/5 flex items-center justify-center mx-auto rounded-full">
-              <Search className="w-12 h-12 text-primary/10" />
-            </div>
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <h3 className="text-4xl font-serif font-black text-primary/20 italic">
-                  {totalItemsCount === 0 ? "The archives are currently empty." : "No artifacts found in archives."}
-                </h3>
-                <p className="text-ink/80 font-serif italic">
-                  {totalItemsCount === 0 
-                    ? (user?.email === 'smubasshir532@gmail.com' ? "As an elite curator, you may seed the initial collection." : "Please check back later for new acquisitions.")
-                    : "Try refining your search or category filters."}
-                </p>
-              </div>
-              
-              {totalItemsCount === 0 && user?.email === 'smubasshir532@gmail.com' ? (
-                <button 
-                  onClick={onSeed}
-                  className="bg-primary text-white px-12 py-5 text-base font-black tracking-[0.4em] uppercase hover:bg-accent transition-all duration-700 shadow-2xl"
-                >
-                  Seed Archives
-                </button>
-              ) : (searchQuery || filterType !== 'all') && (
-                <button 
-                  onClick={() => {
-                    setSearchQuery('');
-                    setFilterType('all');
-                  }}
-                  className="bg-primary text-white px-12 py-5 text-base font-black tracking-[0.4em] uppercase hover:bg-accent transition-all duration-700 shadow-2xl"
-                >
-                  Reset Filters
-                </button>
-              )}
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );
@@ -3033,7 +3009,6 @@ const AdminPanel = ({
   onUpdateFeaturedImage,
   onAdd,
   onEdit,
-  onSeed,
   loading
 }: { 
   items: AuctionItem[], 
@@ -3042,7 +3017,6 @@ const AdminPanel = ({
   onUpdateFeaturedImage: (url: string) => void,
   onAdd: () => void,
   onEdit: (item: AuctionItem) => void,
-  onSeed?: () => void,
   loading?: boolean
 }) => {
   const [newUrl, setNewUrl] = useState(featuredImageUrl);
@@ -3062,14 +3036,6 @@ const AdminPanel = ({
         </div>
         
         <div className="flex gap-4">
-          {onSeed && (
-            <button 
-              onClick={onSeed}
-              className="px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-500 bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20"
-            >
-              Seed Data (Firebase Fill)
-            </button>
-          )}
           <button 
             onClick={() => setActiveTab('inventory')}
             className={cn(
@@ -3601,7 +3567,7 @@ const Footer = ({ onNewsletterSubmit, showSuccess, featuredImageUrl, user, setVi
               <h3 className="text-xl font-serif font-black uppercase tracking-tighter">Strawboss</h3>
             </div>
             <p className="text-ink/80 text-sm max-w-sm leading-relaxed font-serif italic">
-              Est. 1924. The global standard for authenticated elite auctions and private treaties. Built on trust, provenance, and worldwide white-glove expertise.
+              Est. 1992. The global standard for authenticated elite auctions and private treaties. Built on trust, provenance, and worldwide white-glove expertise.
             </p>
           </div>
 
@@ -3959,6 +3925,7 @@ export default function App() {
   const [showToast, setShowToast] = useState(false);
   const [appError, setAppError] = useState<Error | null>(null);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'newest' | 'price-low' | 'price-high'>('newest');
 
   const isAdmin = userProfile?.role === 'admin' || user?.email === 'smubasshir532@gmail.com';
 
@@ -4651,7 +4618,6 @@ export default function App() {
                   <p className="text-xs font-black uppercase tracking-widest text-primary/30">Administrative Controls</p>
                   <p className="text-[10px] text-zinc-400">Items Count: {items.length} | Loading: {loading ? 'YES' : 'NO'}</p>
                   <div className="flex justify-center gap-4">
-                    <button onClick={seedInitialData} className="btn-outline">Firebase Fill (Seed Data)</button>
                     <button onClick={() => setView('admin')} className="btn-primary">Open Admin Panel</button>
                   </div>
                 </div>
@@ -4666,14 +4632,12 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              <Marketplace 
-                items={filteredItems}
-                totalItemsCount={items.length}
-                onSeed={seedInitialData}
+              <Archives 
+                items={items}
                 onRefresh={fetchItems}
                 user={user}
                 loading={loading}
-                onItemClick={(item) => {
+                onItemClick={(item: AuctionItem) => {
                   setSelectedItem(item);
                   setView('detail');
                 }}
@@ -4682,10 +4646,11 @@ export default function App() {
                 filterType={filterType}
                 setFilterType={setFilterType}
                 favorites={favorites}
-                onToggleFavorite={(id, e) => {
-                  e.stopPropagation();
-                  toggleFavorite(id);
+                onToggleFavorite={(id: string, e: React.MouseEvent) => {
+                  toggleFavorite(id, e);
                 }}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
               />
               <MembershipSection onApply={() => setShowMembershipModal(true)} />
             </motion.div>
@@ -4768,7 +4733,6 @@ export default function App() {
                   setEditingItem(item);
                   setShowConsignModal(true);
                 }}
-                onSeed={seedInitialData}
               />
             </motion.div>
           )}

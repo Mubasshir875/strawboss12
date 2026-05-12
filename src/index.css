@@ -7,16 +7,30 @@
   --font-display: "Space Grotesk", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  --color-primary: #000000; /* Pure Black */
-  --color-accent: #000000;  /* Pure Black */
-  --color-ink: #000000;     /* Pure Black for text */
-  --color-paper: #ffffff;   /* Pure White Background */
-  --color-surface: #ffffff; /* White Surface */
+  --color-primary: #000000;
+  --color-accent: #000000;
+  --color-ink: #000000;
+  --color-paper: #fcfcf9;   /* Warm Gallery Off-White */
+  --color-surface: #ffffff;
 }
 
 @layer base {
   body {
-    @apply bg-paper text-ink font-sans antialiased selection:bg-black selection:text-white;
+    @apply bg-paper text-ink font-sans antialiased selection:bg-black selection:text-white min-h-screen relative;
+  }
+
+  /* Grain Texture */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: url("https://grainy-gradients.vercel.app/noise.svg");
+    opacity: 0.04;
+    z-index: 9999;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -26,37 +40,94 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-black text-white px-8 py-4 font-bold text-sm transition-all duration-300 hover:bg-zinc-800 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:pointer-events-none rounded-none uppercase tracking-[0.2em];
+    @apply bg-black text-white px-8 py-4 font-bold text-[10px] transition-all duration-500 hover:bg-zinc-800 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none rounded-none uppercase tracking-[0.3em];
   }
 
   .btn-outline {
-    @apply border border-black px-8 py-4 font-bold text-sm transition-all duration-300 hover:bg-black hover:text-white active:scale-95 rounded-none uppercase tracking-[0.2em];
+    @apply border border-black px-8 py-4 font-bold text-[10px] transition-all duration-500 hover:bg-black hover:text-white active:scale-[0.98] rounded-none uppercase tracking-[0.3em];
   }
 
   .input-field {
-    @apply w-full bg-white border-b border-black/10 py-4 px-0 outline-none focus:border-black transition-all duration-300 placeholder:text-zinc-400 rounded-none text-base;
+    @apply w-full bg-transparent border-b border-black/10 py-4 px-0 outline-none focus:border-black transition-all duration-300 placeholder:text-zinc-300 rounded-none text-base font-serif italic;
   }
 
   .glass {
-    @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-xl;
+    @apply bg-white/70 backdrop-blur-2xl border border-white/20 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.1)];
   }
 
   .card-hover {
-    @apply transition-all duration-500 hover:shadow-2xl hover:-translate-y-1;
+    @apply transition-all duration-700 hover:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.12)] hover:-translate-y-2;
   }
 }
 
-/* Custom Animations */
+/* Custom Utilities */
+.text-stroke {
+  -webkit-text-stroke: 1px currentColor;
+  color: transparent;
+}
+
+.visible-grid {
+  background-size: 40px 40px;
+  background-image: linear-gradient(to right, rgba(0,0,0,0.02) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(0,0,0,0.02) 1px, transparent 1px);
+}
+
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
 
 .animate-marquee {
-  animation: marquee 30s linear infinite;
+  animation: marquee 40s linear infinite;
 }
 
-.text-stroke {
-  -webkit-text-stroke: 1px currentColor;
-  color: transparent;
+/* Print Styles */
+@media print {
+  @page {
+    margin: 2cm;
+    size: A4;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print-only, .print-only * {
+    visibility: visible;
+  }
+
+  .print-only {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .page-break {
+    page-break-after: always;
+  }
+}
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  .print-only {
+    display: block !important;
+  }
+}
+
+/* Hide scrollbar but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
