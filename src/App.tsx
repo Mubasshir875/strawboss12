@@ -64,7 +64,11 @@ import {
   Package,
   LayoutGrid,
   Play,
-  RefreshCw
+  RefreshCw,
+  Truck,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { clsx, type ClassValue } from 'clsx';
@@ -93,6 +97,11 @@ interface AuctionItem {
   buyerDetails?: any;
   aiVideoUrl?: string;
   aiVideoPrompt?: string;
+  orderStatus?: 'Payment Confirmed' | 'Processing' | 'Shipped' | 'Delivered';
+  trackingNumber?: string;
+  trackingCarrier?: string;
+  trackingLink?: string;
+  orderStatusUpdatedAt?: string;
 }
 
 interface Review {
@@ -1168,7 +1177,23 @@ const CountdownTimer = ({ endTime }: { endTime: Timestamp }) => {
   );
 };
 
-const ItemCard = ({ item, onClick, isFavorite, onToggleFavorite, onEdit }: { item: AuctionItem, onClick: () => void, isFavorite: boolean, onToggleFavorite: (e: React.MouseEvent) => void, onEdit?: (e: React.MouseEvent) => void }) => {
+const ItemCard = ({ 
+  item, 
+  onClick, 
+  isFavorite, 
+  onToggleFavorite, 
+  onEdit,
+  isSelectedForPrint,
+  onTogglePrint
+}: { 
+  item: AuctionItem, 
+  onClick: () => void, 
+  isFavorite: boolean, 
+  onToggleFavorite: (e: React.MouseEvent) => void, 
+  onEdit?: (e: React.MouseEvent) => void,
+  isSelectedForPrint?: boolean,
+  onTogglePrint?: (e: React.MouseEvent) => void
+}) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -1209,65 +1234,87 @@ const ItemCard = ({ item, onClick, isFavorite, onToggleFavorite, onEdit }: { ite
           )}
         </div>
 
-        {/* Favorite Button */}
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleFavorite(e);
-          }}
-          className={cn(
-            "absolute top-6 right-6 z-20 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500",
-            isFavorite ? "bg-black text-white" : "bg-white/40 hover:bg-white text-black backdrop-blur-md border border-black/10"
+        {/* Action Controls Column */}
+        <div className="absolute top-6 right-6 z-20 flex flex-col gap-3">
+          {/* Favorite Button */}
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavorite(e);
+            }}
+            className={cn(
+              "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 shadow-md",
+              isFavorite ? "bg-black text-white" : "bg-white/60 hover:bg-white text-black backdrop-blur-md border border-black/10"
+            )}
+          >
+            <Heart className={cn("w-4 h-4", isFavorite && "fill-current")} />
+          </motion.button>
+
+          {/* Add to Curated Print Catalog */}
+          {onTogglePrint && (
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onTogglePrint(e);
+              }}
+              className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 shadow-md",
+                isSelectedForPrint ? "bg-accent text-white" : "bg-white/60 hover:bg-white text-black backdrop-blur-md border border-black/10"
+              )}
+              title="Add to Curated Print Catalog"
+            >
+              <Printer className="w-4 h-4" />
+            </motion.button>
           )}
-        >
-          <Heart className={cn("w-4 h-4", isFavorite && "fill-current")} />
-        </motion.button>
+        </div>
 
         {/* View Details Overlay */}
         <div className={cn(
           "absolute inset-0 bg-black/5 transition-opacity duration-700 flex items-center justify-center",
           isHovered ? "opacity-100" : "opacity-0"
         )}>
-          <div className="w-16 h-16 rounded-full border border-white/30 flex items-center justify-center text-white backdrop-blur-sm">
-             <Plus className="w-6 h-6" />
+          <div className="w-8 h-8 sm:w-16 sm:h-16 rounded-full border border-white/30 flex items-center justify-center text-white backdrop-blur-sm">
+             <Plus className="w-3 h-3 sm:w-6 sm:h-6" />
           </div>
         </div>
       </div>
 
-      <div className="p-4 md:p-8 space-y-4 md:space-y-6 relative bg-white">
+      <div className="p-2 sm:p-4 md:p-8 space-y-2 sm:space-y-4 md:space-y-6 relative bg-white">
         {/* Decorative corner mark */}
-        <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-black/5 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-4 h-4 sm:w-8 sm:h-8 border-t border-r border-black/5 pointer-events-none" />
         
-        <div className="space-y-1 md:space-y-2">
-          <div className="flex items-center gap-2">
-             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-black/30">Archives</span>
-             <span className="w-4 h-[1px] bg-black/10" />
+        <div className="space-y-0.5 sm:space-y-1 md:space-y-2">
+          <div className="flex items-center gap-1 sm:gap-2">
+             <span className="text-[7px] sm:text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-black/30">Archives</span>
+             <span className="w-2 sm:w-4 h-[1px] bg-black/10" />
           </div>
-          <h3 className="text-lg md:text-2xl font-serif font-medium text-black tracking-tight leading-tight group-hover:italic transition-all duration-500 truncate">
+          <h3 className="text-xs sm:text-lg md:text-2xl font-serif font-medium text-black tracking-tight leading-tight group-hover:italic transition-all duration-500 truncate">
             {item.title}
           </h3>
         </div>
 
-        <div className="flex justify-between items-end pt-4 border-t border-black/[0.03]">
-          <div className="space-y-1">
-            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-black/40 block">
-              {item.listingType === 'auction' ? 'Current Valuation' : 'Price / Treaty'}
+        <div className="flex justify-between items-end pt-2 sm:pt-4 border-t border-black/[0.03]">
+          <div className="space-y-0.5">
+            <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] text-black/40 block">
+              {item.listingType === 'auction' ? 'Valuation' : 'Price'}
             </span>
-            <span className="text-xl font-display font-medium text-black">
+            <span className="text-xs sm:text-xl font-display font-medium text-black">
               ${(item.listingType === 'auction' ? (item.currentBid || item.price) : item.price)?.toLocaleString()}
             </span>
           </div>
 
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-col items-end gap-1">
              {item.listingType === 'auction' && (
-               <div className="flex items-center gap-2 px-3 py-1 bg-zinc-50 border border-black/5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                  <span className="text-[8px] font-black uppercase tracking-widest text-black/50">{item.bidCount} Bids</span>
+               <div className="flex items-center gap-1 px-1.5 py-0.5 sm:px-3 sm:py-1 bg-zinc-50 border border-black/5">
+                  <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-[6px] sm:text-[8px] font-black uppercase tracking-widest text-black/50">{item.bidCount} Bids</span>
                </div>
              )}
-             <ChevronRight className="w-4 h-4 text-black/20 group-hover:text-black group-hover:translate-x-1 transition-all duration-500" />
+             <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-black/20 group-hover:text-black group-hover:translate-x-1 transition-all duration-500" />
           </div>
         </div>
 
@@ -1454,7 +1501,9 @@ const Archives = ({
   setSearchQuery,
   sortBy,
   setSortBy,
-  user
+  user,
+  printSelectedIds,
+  setPrintSelectedIds
 }: any) => {
   const filteredItems = useMemo(() => {
     let result = items;
@@ -1537,17 +1586,17 @@ const Archives = ({
 
               <button 
                 onClick={() => {
-                  const curatedItems = items.filter(item => favorites.includes(item.id));
-                  if (curatedItems.length === 0) {
-                    alert('Please curate your collection by hearting some items first.');
+                  const curatedItems = items.filter(item => printSelectedIds?.includes(item.id));
+                  if (!curatedItems || curatedItems.length === 0) {
+                    alert('Please select archives for your curated catalog by clicking the [Printer] button on any item card.');
                     return;
                   }
                   window.print();
                 }}
-                className="px-6 md:px-8 py-3 md:py-4 bg-black text-white text-[9px] md:text-[10px] font-black tracking-[0.3em] uppercase flex items-center gap-3 transition-all hover:bg-zinc-800 shadow-xl no-print"
+                className="px-6 md:px-8 py-3 md:py-4 bg-accent text-white text-[9px] md:text-[10px] font-black tracking-[0.3em] uppercase flex items-center gap-3 transition-all hover:bg-zinc-800 shadow-xl no-print"
               >
                 <Printer className="w-3 md:w-4 h-3 md:h-4" />
-                <span className="hidden md:inline">Print Catalog</span>
+                <span className="hidden md:inline">Print Catalog ({printSelectedIds?.length || 0})</span>
               </button>
 
               <button 
@@ -1564,7 +1613,7 @@ const Archives = ({
         {/* Gallery Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-3 md:gap-x-8 gap-y-6 md:gap-y-16">
           {/* Print View (Hidden on Screen) */}
-          <CatalogPrintView items={items.filter(item => favorites.includes(item.id))} />
+          <CatalogPrintView items={items.filter(item => printSelectedIds?.includes(item.id))} />
 
           <AnimatePresence mode="popLayout">
             {loading ? (
@@ -1577,6 +1626,15 @@ const Archives = ({
                   onClick={() => onItemClick(item)} 
                   isFavorite={favorites.includes(item.id)}
                   onToggleFavorite={(e) => onToggleFavorite(item.id, e)}
+                  isSelectedForPrint={printSelectedIds?.includes(item.id)}
+                  onTogglePrint={(e) => {
+                    e.stopPropagation();
+                    setPrintSelectedIds(prev => 
+                      prev.includes(item.id) 
+                        ? prev.filter(id => id !== item.id) 
+                        : [...prev, item.id]
+                    );
+                  }}
                 />
               ))
             ) : (
@@ -1765,6 +1823,150 @@ const ProfileEditor = ({ profile, onSave, onCancel }: { profile: UserProfile, on
   );
 };
 
+
+export function getTrackingLink(carrier: string, trackingNum: string): string {
+  const cleanNum = trackingNum.trim();
+  switch (carrier.toLowerCase()) {
+    case 'usps':
+      return `https://tools.usps.com/go/TrackConfirmAction?tLabels=${cleanNum}`;
+    case 'fedex':
+      return `https://www.fedex.com/apps/fedextrack/?tracknumbers=${cleanNum}`;
+    case 'ups':
+      return `https://www.ups.com/track?tracknum=${cleanNum}`;
+    case 'dhl':
+    case 'dhl express':
+      return `https://www.dhl.com/en/express/tracking.html?AWB=${cleanNum}`;
+    case 'shippo':
+      return `https://goshippo.com/track/${cleanNum}`;
+    case 'aftership':
+    default:
+      return `https://track.aftership.com/${cleanNum}`;
+  }
+}
+
+const OrderTracker = ({ 
+  status, 
+  trackingCarrier, 
+  trackingNumber, 
+  trackingLink,
+  updatedAt 
+}: { 
+  status?: string, 
+  trackingCarrier?: string, 
+  trackingNumber?: string, 
+  trackingLink?: string,
+  updatedAt?: string
+}) => {
+  const steps = ["Payment Confirmed", "Processing", "Shipped", "Delivered"];
+  // Default status
+  const currentStatus = status || "Payment Confirmed";
+  const currentIndex = steps.indexOf(currentStatus);
+  const activeIndex = currentIndex !== -1 ? currentIndex : 0;
+
+  return (
+    <div className="bg-zinc-50 border border-black/5 p-6 md:p-8 rounded-3xl space-y-8 shadow-inner">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+            <Truck className="w-5 h-5 animate-pulse" />
+          </div>
+          <div>
+            <h4 className="text-sm font-black uppercase tracking-widest text-primary">Prestige Dispatch Tracker</h4>
+            <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mt-0.5">
+              Current Phase: <span className="text-accent font-black">{currentStatus}</span>
+            </p>
+          </div>
+        </div>
+        {updatedAt && (
+          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest bg-white border border-black/5 px-3 py-1.5 rounded-full">
+            Updated {new Date(updatedAt).toLocaleString()}
+          </span>
+        )}
+      </div>
+
+      {/* Progress tracker timeline */}
+      <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-4 pt-4 pb-2">
+        {/* Background connect line */}
+        <div className="hidden md:block absolute left-6 right-6 top-[34px] h-0.5 bg-zinc-200 z-0">
+          <div 
+            className="h-full bg-accent transition-all duration-[1s] ease-in-out" 
+            style={{ width: `${(activeIndex / (steps.length - 1)) * 100}%` }}
+          />
+        </div>
+
+        {steps.map((step, idx) => {
+          const isCompleted = idx < activeIndex;
+          const isActive = idx === activeIndex;
+          const isPastOrCurrent = idx <= activeIndex;
+
+          let stepDesc = "";
+          if (step === "Payment Confirmed") stepDesc = "Funds Transferred";
+          else if (step === "Processing") stepDesc = "Vault Appraisal";
+          else if (step === "Shipped") stepDesc = "Couriers Dispatched";
+          else if (step === "Delivered") stepDesc = "Securely Received";
+
+          return (
+            <div key={step} className="flex md:flex-col items-center md:text-center gap-4 md:gap-3 z-10 w-full md:w-1/4">
+              <div 
+                className={cn(
+                  "w-12 h-12 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-700 border-2",
+                  isCompleted ? "bg-accent border-accent text-white shadow-md shadow-accent/20" :
+                  isActive ? "bg-white border-accent text-accent ring-4 ring-accent/10 scale-110" :
+                  "bg-white border-zinc-200 text-zinc-300"
+                )}
+              >
+                {isCompleted ? "✓" : idx + 1}
+              </div>
+              <div className="space-y-0.5">
+                <p 
+                  className={cn(
+                    "text-[10px] font-black uppercase tracking-[0.2em] transition-colors",
+                    isPastOrCurrent ? "text-primary" : "text-zinc-300"
+                  )}
+                >
+                  {step}
+                </p>
+                <p className="text-[8px] text-zinc-400 font-bold tracking-wider uppercase">
+                  {stepDesc}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Tracking info & link */}
+      {trackingNumber ? (
+        <div className="bg-white rounded-2xl p-6 border border-black/5 flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
+          <div className="space-y-1">
+            <span className="text-[8px] text-zinc-400 font-bold uppercase tracking-widest block">Secure Delivery Passport</span>
+            <p className="text-xs font-mono font-bold text-primary uppercase">
+              {trackingCarrier || 'General Carrier'} — {trackingNumber}
+            </p>
+          </div>
+          {trackingLink && (
+            <a 
+              href={trackingLink} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="px-6 py-3 bg-primary text-white text-[9px] font-black uppercase tracking-[0.3em] rounded-xl hover:bg-accent transition-colors flex items-center gap-2 shadow-sm whitespace-nowrap"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Follow Passage
+            </a>
+          )}
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl p-6 border border-black/5 text-center">
+          <p className="text-zinc-400 text-xs font-bold uppercase tracking-widest">
+            Awaiting transit registry. Your elite courier will assign tracking details shortly.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const UserDashboard = ({ 
   userProfile, 
   favorites, 
@@ -1794,6 +1996,7 @@ const UserDashboard = ({
 }) => {
   const [recentlyViewed, setRecentlyViewed] = useState<AuctionItem[]>([]);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const acquisitions = useMemo(() => items.filter(i => i.buyerUid === userProfile.uid), [items, userProfile.uid]);
 
   useEffect(() => {
@@ -1958,29 +2161,56 @@ const UserDashboard = ({
           </div>
         </div>
 
-        {/* My Collection (Bought) */}
+        {/* My Collection (Bought & Tracked Orders) */}
         <div className="space-y-8">
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-primary uppercase tracking-widest">My Collection</h3>
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{acquisitions.length} Acquired</span>
+            <h3 className="text-xl font-bold text-primary uppercase tracking-widest">My Collection & Tracks</h3>
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{acquisitions.length} Artifacts</span>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {acquisitions.map(item => (
-              <div key={item.id} className="space-y-4">
-                <ItemCard 
-                  item={item} 
-                  onClick={() => onItemClick(item)} 
-                  isFavorite={favorites.some(f => f.id === item.id)}
-                  onToggleFavorite={(e) => onToggleFavorite(item.id, e)}
-                />
-                <button
-                  onClick={() => onLeaveReview(item)}
-                  className="w-full py-4 bg-zinc-50 text-black text-xs font-bold uppercase tracking-widest hover:bg-zinc-100 transition-colors"
-                >
-                  Leave Feedback
-                </button>
-              </div>
-            ))}
+            {acquisitions.map(item => {
+              const currentStatus = item.orderStatus || "Payment Confirmed";
+              let badgeColor = "bg-zinc-100/80 text-zinc-800 border-zinc-200/50";
+              if (currentStatus === "Processing") badgeColor = "bg-amber-100/80 text-amber-900 border-amber-200/50";
+              else if (currentStatus === "Shipped") badgeColor = "bg-blue-100/80 text-blue-900 border-blue-200/50";
+              else if (currentStatus === "Delivered") badgeColor = "bg-emerald-100/80 text-emerald-900 border-emerald-200/50";
+
+              return (
+                <div key={item.id} className="space-y-4 bg-white p-4 border border-zinc-100 rounded-[2.5rem]">
+                  <div className="relative">
+                    <ItemCard 
+                      item={item} 
+                      onClick={() => onItemClick(item)} 
+                      isFavorite={favorites.some(f => f.id === item.id)}
+                      onToggleFavorite={(e) => onToggleFavorite(item.id, e)}
+                    />
+                    <div className="absolute top-4 left-4 z-10">
+                      <span className={cn(
+                        "px-4 py-1.5 rounded-full text-[8.5px] font-black uppercase tracking-[0.2em] border shadow-sm backdrop-blur-md",
+                        badgeColor
+                      )}>
+                        {currentStatus}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <button
+                      onClick={() => setExpandedOrderId(item.id)}
+                      className="py-4 bg-primary text-white text-[10px] font-black uppercase tracking-widest hover:bg-accent transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Truck className="w-3.5 h-3.5" />
+                      Track Dispatch
+                    </button>
+                    <button
+                      onClick={() => onLeaveReview(item)}
+                      className="py-4 bg-zinc-50 border border-black/5 text-[10px] text-zinc-800 font-bold uppercase tracking-widest hover:bg-zinc-100 transition-colors"
+                    >
+                      Leave Feedback
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
             {acquisitions.length === 0 && (
               <div className="col-span-full py-20 text-center border-2 border-dashed border-gray-100 rounded-[2.5rem]">
                 <p className="text-gray-400 font-medium">Your acquired collection is empty.</p>
@@ -1988,6 +2218,100 @@ const UserDashboard = ({
             )}
           </div>
         </div>
+
+        {/* Slide-over Tracking Drawer Sheet */}
+        <AnimatePresence>
+          {expandedOrderId && (() => {
+            const item = acquisitions.find(a => a.id === expandedOrderId);
+            if (!item) return null;
+            return (
+              <div className="fixed inset-0 z-[150] flex justify-end">
+                {/* Backdrop */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.5 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setExpandedOrderId(null)}
+                  className="absolute inset-0 bg-black"
+                />
+                {/* Drawer Sheet */}
+                <motion.div
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                  className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col z-[160] overflow-y-auto border-l border-zinc-100"
+                >
+                  {/* Header */}
+                  <div className="p-8 border-b border-black/5 flex items-center justify-between bg-zinc-50/50">
+                    <div>
+                      <span className="text-[10px] text-accent font-black tracking-[0.3em] uppercase block mb-1">Acquisition Dispatch</span>
+                      <h3 className="text-2xl font-serif font-black text-ink uppercase tracking-tight">Delivery Transit</h3>
+                    </div>
+                    <button 
+                      onClick={() => setExpandedOrderId(null)}
+                      className="w-10 h-10 rounded-full hover:bg-zinc-200 flex items-center justify-center transition-colors text-ink/70"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-8 space-y-8 flex-1">
+                    {/* Order Item Info */}
+                    <div className="flex gap-6 items-center bg-zinc-50 p-6 rounded-3xl border border-black/[0.02]">
+                      <img 
+                        src={item.images[0]} 
+                        alt={item.title} 
+                        className="w-20 h-24 object-cover rounded-xl shadow-md border border-white"
+                      />
+                      <div className="space-y-1.5 flex-1">
+                        <span className="text-[8px] font-black uppercase tracking-[0.25em] text-accent bg-accent/5 px-2.5 py-1 rounded-full">{item.category}</span>
+                        <h4 className="text-base font-serif font-black text-primary line-clamp-1 mt-1">{item.title}</h4>
+                        <p className="text-sm font-semibold font-mono text-ink/70">${(item.currentBid || item.price || 0).toLocaleString()}</p>
+                      </div>
+                    </div>
+
+                    {/* Order Tracker */}
+                    <OrderTracker 
+                      status={item.orderStatus} 
+                      trackingCarrier={item.trackingCarrier} 
+                      trackingNumber={item.trackingNumber} 
+                      trackingLink={item.trackingLink}
+                      updatedAt={item.orderStatusUpdatedAt}
+                    />
+
+                    {/* Extra Delivery Guarantee */}
+                    <div className="p-6 bg-zinc-50 rounded-2xl border border-black/5 space-y-4">
+                      <div className="flex gap-4 items-start">
+                        <ShieldCheck className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-widest text-primary">Prestige Safe-Transit Pledge</p>
+                          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mt-1 leading-relaxed">
+                            Your legacy artifact is secured in temperature-regulated vaults and is accompanied by our elite multi-signature courier specialists. Included is 100% loss-protection insurance.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Footer action */}
+                  <div className="p-8 border-t border-black/5 flex gap-4 bg-zinc-50">
+                    <button 
+                      onClick={() => {
+                        onItemClick(item);
+                        setExpandedOrderId(null);
+                      }}
+                      className="flex-grow py-5 bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-accent transition-colors text-center shadow-lg"
+                    >
+                      View Archive Provenance
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+            );
+          })()}
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -2004,15 +2328,22 @@ const ConsignmentForm = ({
   initialData?: any,
   onError?: (error: Error) => void
 }) => {
-  const [formData, setFormData] = useState(initialData || {
-    title: '',
-    description: '',
-    listingType: 'buy-now',
-    category: 'Fine Art',
-    price: '',
-    startingBid: '',
-    duration: '7',
-    images: [] as string[]
+  const [formData, setFormData] = useState(() => {
+    const base = {
+      title: '',
+      description: '',
+      listingType: 'buy-now' as 'buy-now' | 'auction',
+      category: 'Fine Art',
+      price: '',
+      startingBid: '',
+      duration: '7',
+      endTime: '',
+      images: [] as string[]
+    };
+    if (initialData) {
+      return { ...base, ...initialData };
+    }
+    return base;
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -2163,6 +2494,66 @@ const ConsignmentForm = ({
               />
               {errors.title && <p className="text-xs font-bold text-red-500 mt-2">{errors.title}</p>}
             </div>
+
+            <div className="space-y-3">
+              <label className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">Listing Arrangement</label>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, listingType: 'buy-now' })}
+                  className={cn(
+                    "py-4 px-6 rounded-2xl border text-[10px] font-black uppercase tracking-widest transition-all duration-300 cursor-pointer text-center",
+                    formData.listingType === 'buy-now' 
+                      ? "bg-black text-white border-black" 
+                      : "bg-white text-zinc-500 border-zinc-200 hover:border-black/20 hover:text-black"
+                  )}
+                >
+                  Private Treaty (Buy Now)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, listingType: 'auction' })}
+                  className={cn(
+                    "py-4 px-6 rounded-2xl border text-[10px] font-black uppercase tracking-widest transition-all duration-300 cursor-pointer text-center",
+                    formData.listingType === 'auction' 
+                      ? "bg-black text-white border-black" 
+                      : "bg-white text-zinc-500 border-zinc-200 hover:border-black/20 hover:text-black"
+                  )}
+                >
+                  Archival Auction
+                </button>
+              </div>
+            </div>
+
+            {formData.listingType === 'auction' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <label className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">Auction Duration (Days)</label>
+                  <select
+                    className="input-field appearance-none"
+                    value={formData.duration}
+                    onChange={e => setFormData({ ...formData, duration: e.target.value })}
+                  >
+                    <option value="1">1 Day</option>
+                    <option value="3">3 Days</option>
+                    <option value="5">5 Days</option>
+                    <option value="7">7 Days</option>
+                    <option value="14">14 Days</option>
+                    <option value="30">30 Days</option>
+                  </select>
+                </div>
+                <div className="space-y-3">
+                  <label className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">Specific Auction End Time</label>
+                  <input
+                    type="datetime-local"
+                    className="input-field"
+                    value={formData.endTime}
+                    onChange={e => setFormData({ ...formData, endTime: e.target.value })}
+                  />
+                  <p className="text-[9px] text-zinc-400 font-medium">Override duration with a custom end date/time.</p>
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-3">
@@ -2405,7 +2796,9 @@ const ItemDetail = ({
         await updateDoc(doc(db, 'items', item.id), {
           status: 'sold',
           buyerUid: user.uid,
-          buyerDetails: details
+          buyerDetails: details,
+          orderStatus: 'Payment Confirmed',
+          orderStatusUpdatedAt: new Date().toISOString()
         });
         
         // Refresh data with delay
@@ -2675,9 +3068,24 @@ const ItemDetail = ({
                 </div>
               ) : (
                 <div className="space-y-6">
-                  <div className="w-full bg-primary/5 text-primary/20 py-10 rounded-2xl text-center text-base font-black tracking-[0.6em] uppercase border-2 border-dashed border-primary/10">
-                    Piece Acquired
-                  </div>
+                  {user && item.buyerUid === user.uid ? (
+                    <div className="space-y-6">
+                      <div className="w-full bg-emerald-500/10 text-emerald-700 py-6 rounded-2xl text-center text-sm font-black tracking-[0.4em] uppercase border border-emerald-500/25">
+                        ✓ You Have Acquired This Historical Piece
+                      </div>
+                      <OrderTracker 
+                        status={item.orderStatus} 
+                        trackingCarrier={item.trackingCarrier} 
+                        trackingNumber={item.trackingNumber} 
+                        trackingLink={item.trackingLink} 
+                        updatedAt={item.orderStatusUpdatedAt}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full bg-primary/5 text-primary/20 py-10 rounded-2xl text-center text-base font-black tracking-[0.6em] uppercase border-2 border-dashed border-primary/10">
+                      Piece Acquired
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -3002,6 +3410,207 @@ const ItemDetail = ({
   );
 };
 
+const AdminOrderCard = ({ item, onRefresh }: { item: AuctionItem, onRefresh?: () => void }) => {
+  const [status, setStatus] = useState(item.orderStatus || 'Payment Confirmed');
+  const [carrier, setCarrier] = useState(item.trackingCarrier || 'USPS');
+  const [customCarrier, setCustomCarrier] = useState('');
+  const [trackingNum, setTrackingNum] = useState(item.trackingNumber || '');
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const handleUpdateOrder = async () => {
+    setIsSaving(true);
+    setMessage(null);
+    try {
+      const finalCarrier = carrier === 'Custom' ? customCarrier : carrier;
+      const finalTrackingLink = trackingNum ? getTrackingLink(finalCarrier, trackingNum) : '';
+
+      // Update in Firestore
+      await updateDoc(doc(db, 'items', item.id), {
+        orderStatus: status,
+        trackingCarrier: finalCarrier,
+        trackingNumber: trackingNum,
+        trackingLink: finalTrackingLink,
+        orderStatusUpdatedAt: new Date().toISOString()
+      });
+
+      // Automated email triggers if Shipped or Delivered!
+      if ((status === 'Shipped' || status === 'Delivered') && status !== item.orderStatus) {
+        const buyerEmail = item.buyerDetails?.email || 'customer@activecollector.com';
+        const emailSubject = status === 'Shipped' 
+          ? `Dispatched: Your Strawboss Artifact [${item.title}] is on the way!`
+          : `Delivered: Your Strawboss Artifact [${item.title}] has been received!`;
+        
+        let htmlBody = '';
+        if (status === 'Shipped') {
+          htmlBody = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; color: #1e293b;">
+              <h2 style="color: #0f172a; font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 2px solid #de1d4f; padding-bottom: 12px; margin-top: 0;">Strawboss Archives Dispatch</h2>
+              <p style="font-size: 15px; line-height: 1.6; color: #475569;">We are pleased to inform you that your elite historical acquisition, <strong>${item.title}</strong>, has been verified, secure-packaged, and handed to our premium dispatch couriers.</p>
+              
+              <div style="background-color: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; padding: 20px; margin: 25px 0;">
+                <p style="margin: 0 0 8px 0; color: #de1d4f; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em;">TRACKING & CARRIER INFO</p>
+                <p style="margin: 0; color: #0f172a; font-family: monospace; font-size: 14px; font-weight: bold;">${finalCarrier.toUpperCase()} — ${trackingNum}</p>
+              </div>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${finalTrackingLink}" style="background-color: #0f172a; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; display: inline-block; box-shadow: 0 4px 12px rgba(15,23,42,0.15);">Track Your Dispatch Live</a>
+              </div>
+              
+              <p style="font-size: 12px; line-height: 1.5; color: #64748b;">If you have any specific security or storage instructions for the courier, please contact our administrative desk immediately.</p>
+              <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-top: 40px; padding-bottom: 15px;" />
+              <p style="color: #94a3b8; font-size: 10px; text-align: center; margin: 0;">© 2026 Strawboss Estate Archives. Private Treaty Acquisitions.</p>
+            </div>
+          `;
+        } else {
+          htmlBody = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; color: #1e293b;">
+              <h2 style="color: #0f172a; font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 2px solid #10b981; padding-bottom: 12px; margin-top: 0;">Strawboss Delivery Confirmation</h2>
+              <p style="font-size: 15px; line-height: 1.6; color: #475569;">We have received multi-signature courier confirmation that your artifact <strong>${item.title}</strong> has arrived at your secure destination.</p>
+              <p style="font-size: 15px; line-height: 1.6; color: #475569;">Please review the provenance document, secure packaging verification seals, and the appraisal certificate enclosed in the package.</p>
+              
+              <div style="text-align: center; margin: 35px 0;">
+                <a href="${window.location.origin}" style="background-color: #10b981; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; display: inline-block; box-shadow: 0 4px 12px rgba(16,185,129,0.15);">Review & Confirm Delivery</a>
+              </div>
+              
+              <p style="font-size: 12px; line-height: 1.5; color: #64748b;">Thank you for consigning and building your modern collection with Strawboss. If you wish to leave seller feedback, please visit your collector profile dashboard.</p>
+              <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-top: 40px; padding-bottom: 15px;" />
+              <p style="color: #94a3b8; font-size: 10px; text-align: center; margin: 0;">© 2026 Strawboss Estate Archives. Private Treaty Acquisitions.</p>
+            </div>
+          `;
+        }
+
+        // Send actual API POST request to /api/send-email
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: buyerEmail,
+            subject: emailSubject,
+            html: htmlBody
+          })
+        });
+      }
+
+      setMessage({ type: 'success', text: 'Order status updated successfully and buyer notified!' });
+      if (onRefresh) setTimeout(onRefresh, 1000);
+    } catch (e: any) {
+      console.error(e);
+      setMessage({ type: 'error', text: e.message || 'Failed to update order tracking.' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const buyer = item.buyerDetails || {};
+
+  return (
+    <div className="bg-white rounded-[32px] border border-black/5 p-8 flex flex-col md:grid md:grid-cols-[1.5fr_2fr_2fr] gap-8 shadow-sm hover:shadow-lg transition-all duration-500">
+      {/* Col 1: Piece Details */}
+      <div className="flex gap-6 items-start">
+        <img 
+          src={item.images[0]} 
+          alt={item.title} 
+          className="w-24 h-28 object-cover rounded-2xl shadow-md border"
+        />
+        <div className="space-y-1">
+          <span className="text-[9px] font-black uppercase text-accent bg-accent/5 px-2.5 py-1 rounded-full">{item.category}</span>
+          <h4 className="text-base font-serif font-black text-ink line-clamp-2 pt-1.5 leading-tight">{item.title}</h4>
+          <p className="text-sm font-mono font-bold text-ink/70 pt-1">${(item.currentBid || item.price || 0).toLocaleString()}</p>
+        </div>
+      </div>
+
+      {/* Col 2: Buyer Details */}
+      <div className="space-y-3 bg-zinc-50/50 p-6 rounded-2xl border border-black/[0.02]">
+        <span className="text-[9px] font-black uppercase tracking-widest text-ink/40">Buyer Passport & Address</span>
+        <div className="space-y-2 text-xs">
+          <p className="font-bold text-primary">{buyer.fullName || 'Anonymous Collector'}</p>
+          <p className="text-zinc-500"><span className="text-zinc-400">Email:</span> {buyer.email || 'N/A'}</p>
+          <p className="text-zinc-500"><span className="text-zinc-400">Phone:</span> {buyer.phone || 'N/A'}</p>
+          <p className="text-zinc-600 leading-relaxed"><span className="text-zinc-400">Ship To:</span> <br/>{buyer.address || 'N/A'}, {buyer.city || ''}</p>
+        </div>
+      </div>
+
+      {/* Col 3: Courier Tracking Form */}
+      <div className="space-y-4 flex flex-col justify-between">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Dispatch Status</label>
+            <select 
+              value={status}
+              onChange={e => setStatus(e.target.value as any)}
+              className="w-full bg-paper py-3 px-4 rounded-xl border border-black/5 text-xs outline-none focus:ring-1 focus:ring-accent font-bold"
+            >
+              <option value="Payment Confirmed">Payment Confirmed</option>
+              <option value="Processing">Processing</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Delivered">Delivered</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Courier Carrier</label>
+            <select 
+              value={carrier}
+              onChange={e => setCarrier(e.target.value)}
+              className="w-full bg-paper py-3 px-4 rounded-xl border border-black/5 text-xs outline-none focus:ring-1 focus:ring-accent font-bold"
+            >
+              <option value="USPS">USPS Express</option>
+              <option value="FedEx">FedEx International</option>
+              <option value="UPS">UPS Worldwide</option>
+              <option value="DHL">DHL Express</option>
+              <option value="AfterShip">AfterShip Tracker</option>
+              <option value="Shippo">Shippo Services</option>
+              <option value="Custom">Custom Carrier</option>
+            </select>
+          </div>
+        </div>
+
+        {carrier === 'Custom' && (
+          <div className="space-y-1.5">
+            <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Custom Carrier Name</label>
+            <input 
+              type="text" 
+              value={customCarrier}
+              onChange={e => setCustomCarrier(e.target.value)}
+              placeholder="E.g. Royal Mail, Aramex"
+              className="w-full bg-paper py-3 px-4 rounded-xl border border-black/5 text-xs outline-none focus:ring-1 focus:ring-accent font-semibold"
+            />
+          </div>
+        )}
+
+        <div className="space-y-1.5">
+          <label className="text-[9px] font-black uppercase tracking-wider text-zinc-400">Courier Tracking Number</label>
+          <input 
+            type="text" 
+            value={trackingNum}
+            onChange={e => setTrackingNum(e.target.value)}
+            placeholder="E.g. 1Z999AA10123456784"
+            className="w-full bg-paper py-3 px-4 rounded-xl border border-black/5 text-xs font-mono outline-none focus:ring-1 focus:ring-accent"
+          />
+        </div>
+
+        {message && (
+          <p className={cn(
+            "text-[10px] font-bold uppercase tracking-wider text-center p-2 rounded-lg",
+            message.type === 'success' ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
+          )}>
+            {message.text}
+          </p>
+        )}
+
+        <button
+          onClick={handleUpdateOrder}
+          disabled={isSaving}
+          className="w-full py-4 bg-primary text-white text-[10px] uppercase font-black tracking-widest hover:bg-accent disabled:opacity-50 transition-colors shadow-md rounded-xl"
+        >
+          {isSaving ? "Publishing Dispatch..." : "Confirm & Notify Customer"}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const AdminPanel = ({ 
   items, 
   onDelete,
@@ -3009,7 +3618,8 @@ const AdminPanel = ({
   onUpdateFeaturedImage,
   onAdd,
   onEdit,
-  loading
+  loading,
+  onRefresh
 }: { 
   items: AuctionItem[], 
   onDelete: (id: string) => void,
@@ -3017,10 +3627,11 @@ const AdminPanel = ({
   onUpdateFeaturedImage: (url: string) => void,
   onAdd: () => void,
   onEdit: (item: AuctionItem) => void,
-  loading?: boolean
+  loading?: boolean,
+  onRefresh?: () => void
 }) => {
   const [newUrl, setNewUrl] = useState(featuredImageUrl);
-  const [activeTab, setActiveTab] = useState<'inventory' | 'settings'>('inventory');
+  const [activeTab, setActiveTab] = useState<'inventory' | 'settings' | 'orders'>('inventory');
 
   return (
     <div className="max-w-[1400px] mx-auto px-6 md:px-12 py-32 space-y-20">
@@ -3035,7 +3646,7 @@ const AdminPanel = ({
           </h2>
         </div>
         
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-4">
           <button 
             onClick={() => setActiveTab('inventory')}
             className={cn(
@@ -3044,6 +3655,15 @@ const AdminPanel = ({
             )}
           >
             Manage Inventory
+          </button>
+          <button 
+            onClick={() => setActiveTab('orders')}
+            className={cn(
+              "px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-500",
+              activeTab === 'orders' ? "bg-primary text-white shadow-2xl" : "bg-white text-primary border border-black/5 hover:bg-black/5"
+            )}
+          >
+            Manage Orders Tracking
           </button>
           <button 
             onClick={() => setActiveTab('settings')}
@@ -3080,6 +3700,32 @@ const AdminPanel = ({
             >
               Update Background
             </button>
+          </div>
+        </div>
+      ) : activeTab === 'orders' ? (
+        <div className="space-y-12">
+          <div className="flex justify-between items-center pb-4 border-b">
+            <div>
+              <h3 className="text-2xl font-serif font-black text-ink uppercase tracking-tight">Active Dispatches</h3>
+              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mt-1">Manage and track courier transit of sold legacy items.</p>
+            </div>
+            <span className="text-xs font-black uppercase tracking-widest text-zinc-400 bg-zinc-100 px-4 py-2 rounded-full">
+              {items.filter(item => item.status === 'sold').length} Total Sold
+            </span>
+          </div>
+
+          <div className="space-y-8">
+            {items.filter(item => item.status === 'sold').length === 0 ? (
+              <div className="bg-white rounded-[32px] p-20 text-center border-2 border-dashed border-zinc-200">
+                <Package className="w-12 h-12 text-zinc-300 mx-auto mb-4" />
+                <p className="text-zinc-500 font-bold uppercase tracking-widest text-sm">No items have been acquired yet.</p>
+                <p className="text-zinc-400 text-xs mt-1">Sold pieces will automatically appear here for white-glove transit coordination.</p>
+              </div>
+            ) : (
+              items.filter(item => item.status === 'sold').map(item => (
+                <AdminOrderCard key={item.id} item={item} onRefresh={onRefresh} />
+              ))
+            )}
           </div>
         </div>
       ) : (
@@ -3926,10 +4572,183 @@ export default function App() {
   const [appError, setAppError] = useState<Error | null>(null);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'newest' | 'price-low' | 'price-high'>('newest');
+  const [printSelectedIds, setPrintSelectedIds] = useState<string[]>([]);
+
+  const handlePrintCatalog = () => {
+    const selectedItems = items.filter(item => printSelectedIds.includes(item.id));
+    if (selectedItems.length === 0) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert("Please allow popups to open printed catalog brochure.");
+      return;
+    }
+
+    const itemsHtml = selectedItems.map(item => `
+      <div class="item">
+        <div class="image-container">
+          <img src="${item.images[0]}" alt="${item.title}" />
+        </div>
+        <div class="details">
+          <div class="category">${item.category.toUpperCase()}</div>
+          <h2 class="title">${item.title}</h2>
+          <p class="description">${item.description}</p>
+          <div class="valuation">
+            <span class="label">${item.listingType === 'auction' ? 'HISTORIC VALUATION' : 'PRIVATE TREATY APPRAISAL'}</span>
+            <span class="value">$${(item.listingType === 'auction' ? (item.currentBid || item.price) : item.price)?.toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+    `).join('<hr class="divider"/>');
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Strawboss Estate Archives — Curated Collection Catalog</title>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap');
+            body {
+              font-family: 'Inter', sans-serif;
+              color: #1a1a1a;
+              background-color: #ffffff;
+              margin: 40px;
+              line-height: 1.6;
+            }
+            .header {
+              text-align: center;
+              border-bottom: 2px solid #de1d4f;
+              padding-bottom: 30px;
+              margin-bottom: 50px;
+            }
+            .brand {
+              font-family: 'Playfair Display', serif;
+              font-size: 32px;
+              font-weight: 700;
+              letter-spacing: -0.02em;
+              text-transform: uppercase;
+              margin: 0;
+            }
+            .title-italics {
+              font-style: italic;
+              font-weight: 300;
+              text-transform: lowercase;
+            }
+            .subtitle {
+              font-size: 10px;
+              font-weight: 600;
+              letter-spacing: 0.4em;
+              text-transform: uppercase;
+              color: #666;
+              margin-top: 8px;
+            }
+            .timestamp {
+              font-size: 9px;
+              color: #999;
+              margin-top: 15px;
+              font-family: monospace;
+            }
+            .item {
+              display: grid;
+              grid-template-columns: 1fr 2fr;
+              gap: 40px;
+              margin-bottom: 40px;
+              page-break-inside: avoid;
+            }
+            .image-container img {
+              width: 100%;
+              max-height: 380px;
+              object-fit: cover;
+              border: 1px solid #eee;
+            }
+            .category {
+              font-size: 9px;
+              font-weight: 600;
+              letter-spacing: 0.3em;
+              color: #de1d4f;
+              margin-bottom: 10px;
+            }
+            .title {
+              font-family: 'Playfair Display', serif;
+              font-size: 24px;
+              font-weight: 700;
+              margin-top: 0;
+              margin-bottom: 15px;
+              line-height: 1.2;
+            }
+            .description {
+              font-size: 11px;
+              color: #444;
+              margin-bottom: 25px;
+              text-align: justify;
+            }
+            .valuation {
+              background-color: #fcfcfc;
+              border: 1px solid #f0f0f0;
+              padding: 20px;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            }
+            .valuation .label {
+              font-size: 9px;
+              font-weight: 600;
+              letter-spacing: 0.2em;
+              color: #888;
+            }
+            .valuation .value {
+              font-size: 20px;
+              font-weight: 600;
+              font-family: 'Playfair Display', serif;
+            }
+            .divider {
+              border: 0;
+              border-top: 1px solid #eee;
+              margin: 40px 0;
+            }
+            .footer {
+              text-align: center;
+              font-size: 9px;
+              color: #999;
+              margin-top: 80px;
+              border-top: 1px solid #eee;
+              padding-top: 20px;
+            }
+            @media print {
+              body { margin: 20px; }
+              hr.divider { margin: 30px 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1 class="brand">Strawboss Estate Archives</h1>
+            <div class="subtitle">Private treaty & curated collections catalog</div>
+            <div class="timestamp">GENERATED ON ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+          </div>
+          
+          <div class="items-list">
+            ${itemsHtml}
+          </div>
+
+          <div class="footer">
+            CONFIDENTIAL ARCHIVAL PREVIEW. ALL RIGHTS RESERVED. STRAWBOSS ESTATE © 2026.
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
 
   const isAdmin = userProfile?.role === 'admin' || user?.email === 'smubasshir532@gmail.com';
 
-  if (appError) throw appError;
+  // Gracefully handle appError in-line inside the UI rather than throwing and crashing the entire React tree.
 
   useEffect(() => {
     const settingsRef = doc(db, 'settings', 'featured');
@@ -4185,11 +5004,16 @@ export default function App() {
         if (data.listingType === 'buy-now') {
           updatedItem.price = parseFloat(data.price) || 0;
           updatedItem.currentBid = null;
+          updatedItem.endTime = null;
         } else {
           updatedItem.currentBid = parseFloat(data.startingBid) || 0;
           updatedItem.price = null;
-          const durationDays = parseInt(data.duration) || 7;
-          updatedItem.endTime = Timestamp.fromDate(new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000));
+          if (data.endTime) {
+            updatedItem.endTime = Timestamp.fromDate(new Date(data.endTime));
+          } else {
+            const durationDays = parseInt(data.duration) || 7;
+            updatedItem.endTime = Timestamp.fromDate(new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000));
+          }
         }
 
         await updateDoc(doc(db, 'items', editingItem.id), updatedItem);
@@ -4217,7 +5041,9 @@ export default function App() {
           sellerName: userProfile?.displayName || user.displayName || 'Anonymous Collector',
           status: 'active',
           createdAt: serverTimestamp(),
-          endTime: data.listingType === 'auction' ? Timestamp.fromDate(new Date(Date.now() + (parseInt(data.duration) || 7) * 24 * 60 * 60 * 1000)) : null
+          endTime: data.listingType === 'auction'
+            ? (data.endTime ? Timestamp.fromDate(new Date(data.endTime)) : Timestamp.fromDate(new Date(Date.now() + (parseInt(data.duration) || 7) * 24 * 60 * 60 * 1000)))
+            : null
         };
 
         const docRef = await addDoc(collection(db, 'items'), newItem);
@@ -4398,9 +5224,74 @@ export default function App() {
     }
   };
 
+  const handleRetryAll = async () => {
+    setAppError(null);
+    setLoading(true);
+    await fetchItems();
+  };
+
+  const handleOfflineMode = () => {
+    setAppError(null);
+    const cached = localStorage.getItem('cached_items');
+    if (cached) {
+      try {
+        setItems(JSON.parse(cached));
+      } catch (e) {
+        setItems(SAMPLE_ITEMS);
+      }
+    } else {
+      setItems(SAMPLE_ITEMS);
+    }
+  };
+
   return (
     <PayPalScriptProvider options={{ clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID || "test" }}>
       <div className="min-h-screen flex flex-col selection:bg-accent selection:text-white relative overflow-x-hidden">
+        {/* Archival Sync Interruption Graceful UI Overlay */}
+        {appError && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
+            <div className="bg-zinc-900 border border-amber-500/20 max-w-lg w-full p-8 rounded-[2rem] shadow-[0_40px_100px_rgba(0,0,0,0.8)] text-white text-center space-y-6 animate-fadeIn">
+              <div className="w-16 h-16 bg-red-500/10 border border-red-500/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                <ShieldCheck className="w-8 h-8 text-red-500 animate-pulse" />
+              </div>
+              <h3 className="text-2xl font-serif font-black uppercase tracking-tight text-white">
+                Archival Sync Interrupted
+              </h3>
+              <p className="text-zinc-400 text-sm leading-relaxed">
+                {(() => {
+                  try {
+                    const parsedError = JSON.parse(appError.message);
+                    if (parsedError.error) {
+                      return `We encountered an issue during database communication: ${parsedError.error} (Action: ${parsedError.operationType} on Path: ${parsedError.path})`;
+                    }
+                  } catch (e) {}
+                  return appError.message || "An unexpected connection interruption has occurred.";
+                })()}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                <button
+                  onClick={handleRetryAll}
+                  className="flex-1 py-3 px-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-zinc-200 transition-all shadow-md cursor-pointer"
+                >
+                  Retry Connection
+                </button>
+                <button
+                  onClick={handleOfflineMode}
+                  className="flex-1 py-3 px-4 bg-amber-500/10 border border-amber-500/20 text-amber-400 font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-amber-500/20 transition-all cursor-pointer"
+                >
+                  Offline Catalog
+                </button>
+                <button
+                  onClick={() => setAppError(null)}
+                  className="py-3 px-4 text-zinc-500 hover:text-zinc-300 text-[10px] uppercase font-black tracking-widest cursor-pointer"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       {/* 3D Background Elements */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 blur-[120px] rounded-full animate-pulse" />
@@ -4637,6 +5528,8 @@ export default function App() {
                 onRefresh={fetchItems}
                 user={user}
                 loading={loading}
+                printSelectedIds={printSelectedIds}
+                setPrintSelectedIds={setPrintSelectedIds}
                 onItemClick={(item: AuctionItem) => {
                   setSelectedItem(item);
                   setView('detail');
@@ -4725,6 +5618,7 @@ export default function App() {
                 featuredImageUrl={featuredImageUrl}
                 onUpdateFeaturedImage={handleUpdateFeaturedImage}
                 loading={loading}
+                onRefresh={fetchItems}
                 onAdd={() => {
                   setEditingItem(null);
                   setShowConsignModal(true);
@@ -4753,6 +5647,14 @@ export default function App() {
                 price: editingItem.price?.toString() || '',
                 startingBid: editingItem.currentBid?.toString() || '',
                 duration: '7',
+                endTime: editingItem.endTime 
+                  ? (() => {
+                      const d = typeof editingItem.endTime.toDate === 'function' 
+                        ? editingItem.endTime.toDate() 
+                        : new Date(editingItem.endTime.seconds * 1000);
+                      return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                    })()
+                  : '',
                 images: editingItem.images
               } : undefined}
             />
@@ -4824,6 +5726,14 @@ export default function App() {
                   price: editingItem.price?.toString() || '',
                   startingBid: editingItem.currentBid?.toString() || '',
                   duration: '7',
+                  endTime: editingItem.endTime 
+                    ? (() => {
+                        const d = typeof editingItem.endTime.toDate === 'function' 
+                          ? editingItem.endTime.toDate() 
+                          : new Date(editingItem.endTime.seconds * 1000);
+                        return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                      })()
+                    : '',
                   images: editingItem.images
                 } : undefined}
               />
