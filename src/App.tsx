@@ -68,7 +68,9 @@ import {
   Truck,
   ExternalLink,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Share2,
+  Copy
 } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { clsx, type ClassValue } from 'clsx';
@@ -720,165 +722,142 @@ const Navbar = ({
     <motion.header 
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className="fixed top-0 left-0 right-0 z-[100] bg-white border-b border-black/5"
+      className="fixed top-0 left-0 right-0 z-[100] bg-[#faf8f5]/95 backdrop-blur-md border-b border-stone-200/80"
     >
-      {/* Top Announcement Bar */}
-      <div className="bg-black text-white py-2 px-6 text-[10px] md:text-xs font-black uppercase tracking-[0.3em] flex justify-between items-center">
-        <span>Est. 1992 | Premier Auction House</span>
-        <span className="hidden md:block">Worldwide White-Glove Delivery</span>
-        <span className="md:hidden">White-Glove Delivery</span>
+      {/* Curatorial Utility Strip */}
+      <div className="bg-[#171513] text-[#e7e5e4] py-1.5 px-4 md:px-12 text-[10px] font-sans font-medium uppercase tracking-[0.25em] flex justify-between items-center border-b border-stone-800">
+        <span className="flex items-center gap-2">
+          <span className="text-stone-400">STRAWBOSS ARCHIVES</span>
+          <span className="text-stone-600">·</span>
+          <span className="hidden sm:inline text-stone-300">EST. 1992</span>
+          <span className="hidden md:inline text-stone-600">·</span>
+          <span className="hidden md:inline text-stone-400">LONDON · NEW YORK · GENEVA</span>
+        </span>
+        <span className="flex items-center gap-4 text-stone-300">
+          <span className="hidden lg:inline text-[9px] text-stone-400">AUTHENTICATED PROVENANCE GUARANTEED</span>
+          <span className="flex items-center gap-1.5 text-amber-400/90">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            <span className="text-[9px] tracking-widest font-semibold">LIVE AUCTION DESK</span>
+          </span>
+        </span>
       </div>
 
-      <nav className="max-w-[1800px] mx-auto px-4 md:px-12 h-14 md:h-20 flex items-center justify-between">
-        {/* Live Bidding Ticker - Hidden on mobile for cleaner look */}
-        <div className="hidden md:block absolute top-full left-0 right-0 bg-accent text-white py-1 overflow-hidden z-[-1]">
-          <div className="animate-marquee whitespace-nowrap flex items-center gap-12 text-[10px] font-black uppercase tracking-[0.2em]">
-            {[
-              "Live: 18th Century French Rococo Armchair - Current Bid: $12,500",
-              "Upcoming: Imperial Ming Dynasty Vase - Starts in 2h 15m",
-              "Sold: 1952 Patek Philippe Perpetual Calendar - Final Price: $245,000",
-              "Live: Rare Blue Diamond Pendant - Current Bid: $85,000",
-              "Upcoming: Original Manuscript by Leonardo da Vinci - Starts in 5h 30m"
-            ].map((text, i) => (
-              <span key={i} className="flex items-center gap-4">
-                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                {text}
-              </span>
-            ))}
-            {/* Duplicate for seamless loop */}
-            {[
-              "Live: 18th Century French Rococo Armchair - Current Bid: $12,500",
-              "Upcoming: Imperial Ming Dynasty Vase - Starts in 2h 15m",
-              "Sold: 1952 Patek Philippe Perpetual Calendar - Final Price: $245,000",
-              "Live: Rare Blue Diamond Pendant - Current Bid: $85,000",
-              "Upcoming: Original Manuscript by Leonardo da Vinci - Starts in 5h 30m"
-            ].map((text, i) => (
-              <span key={i + 10} className="flex items-center gap-4">
-                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                {text}
-              </span>
-            ))}
+      <nav className="max-w-[1800px] mx-auto px-4 md:px-12 h-16 md:h-20 flex items-center justify-between gap-6">
+        {/* Zone 1: Wordmark */}
+        <div 
+          className="flex items-center gap-3 cursor-pointer group flex-shrink-0"
+          onClick={() => setView('home')}
+        >
+          <div className="w-9 h-9 md:w-11 md:h-11 rounded-full overflow-hidden border border-stone-300 shadow-sm group-hover:border-stone-900 transition-colors">
+            <LazyImage 
+              src={featuredImageUrl} 
+              alt="Logo" 
+              imgClassName="object-cover"
+              loading="eager"
+            />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xl md:text-2xl font-serif font-semibold tracking-wider text-stone-900 leading-none">
+              STRAWBOSS
+            </span>
+            <span className="text-[9px] font-sans tracking-[0.3em] uppercase text-stone-500 font-medium mt-0.5">
+              Archives & Auctions
+            </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 md:gap-12">
-            <div 
-              className="flex items-center gap-2 md:gap-4 cursor-pointer group"
-              onClick={() => setView('home')}
+        {/* Zone 2: Curated Nav Links */}
+        <div className="hidden lg:flex items-center gap-7 text-[11px] font-sans uppercase tracking-[0.18em] text-stone-600">
+          {[
+            { name: 'Live Auctions', view: 'marketplace' },
+            { name: 'Private Treaty', view: 'marketplace' },
+            { name: 'Consign Artifact', view: 'sell' },
+            { name: 'Monograph & Provenance', view: 'about' },
+            ...(isAdmin ? [{ name: 'Curator Desk', view: 'admin' }] : [])
+          ].map((item) => (
+            <button 
+              key={item.name}
+              onClick={() => setView(item.view)}
+              className={cn(
+                "hover:text-stone-950 transition-colors py-1 relative whitespace-nowrap font-medium",
+                view === item.view ? "text-stone-950 font-semibold after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1.5px] after:bg-stone-900" : "text-stone-600"
+              )}
             >
-              <div className="flex items-center gap-2 md:gap-3">
-                <div className="w-8 h-8 md:w-12 md:h-12 rounded-full overflow-hidden border border-black/5 shadow-lg group-hover:scale-110 transition-transform duration-500">
-                  <LazyImage 
-                    src={featuredImageUrl} 
-                    alt="Logo" 
-                    imgClassName="object-cover"
-                    loading="eager"
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <h1 className="text-lg md:text-2xl font-black tracking-tighter uppercase leading-none text-black">Strawboss</h1>
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setView('marketplace');
-                    }}
-                    className="text-[8px] md:text-xs uppercase tracking-[0.2em] text-zinc-400 font-bold hover:text-primary transition-colors text-left"
-                  >
-                    Archives
-                  </button>
-                </div>
-              </div>
-            </div>
+              {item.name}
+            </button>
+          ))}
+        </div>
 
-          <div className="hidden lg:flex items-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
-            {[
-              { name: 'Antiques', view: 'marketplace' },
-              { name: 'Collection', view: 'marketplace' },
-              { name: 'Live Auctions', view: 'marketplace' },
-              { name: 'Catalogues', view: 'marketplace' },
-              { name: 'New Acquisitions', view: 'marketplace' },
-              ...(isAdmin ? [{ name: 'Admin', view: 'admin' }] : [])
-            ].map((item) => (
-              <button 
-                key={item.name}
-                onClick={() => setView(item.view)}
-                className={cn(
-                  "hover:text-black transition-all duration-300 relative group py-2 whitespace-nowrap",
-                  view === item.view && "text-black border-b border-black"
-                )}
-              >
-                {item.name}
-              </button>
-            ))}
+        {/* Search Input - Desktop */}
+        <div className="hidden xl:flex items-center flex-1 max-w-sm mx-4">
+          <div className="relative w-full">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
+            <input 
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Search catalog, era, medium..."
+              className="w-full bg-white/70 border border-stone-300/80 rounded-none py-2 pl-9 pr-3 text-xs font-sans placeholder:text-stone-400 outline-none focus:bg-white focus:border-stone-800 transition-all"
+            />
           </div>
         </div>
 
-        {/* Mobile Search Bar - Amazon Style */}
-        <div className="flex-1 max-w-md mx-4 md:hidden">
-          <div className="relative w-full group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-400" />
+        {/* Zone 3: Actions */}
+        <div className="flex items-center gap-3 md:gap-5 flex-shrink-0">
+          {/* Mobile search toggle / simple input */}
+          <div className="xl:hidden w-32 sm:w-48 relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-stone-400 pointer-events-none" />
             <input 
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Search..."
-              className="w-full bg-zinc-100 border-none rounded-lg py-2 pl-8 pr-3 text-[10px] font-bold tracking-widest outline-none focus:bg-white transition-all"
+              className="w-full bg-white/80 border border-stone-300 rounded-none py-1.5 pl-7 pr-2 text-[11px] font-sans outline-none focus:border-stone-800"
             />
           </div>
-        </div>
 
-        <div className="hidden xl:flex items-center flex-1 max-w-md mx-12">
-          <div className="relative w-full group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-black transition-colors" />
-            <input 
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Search catalog..."
-              className="w-full bg-zinc-50 border border-black/5 rounded-full py-2 pl-12 pr-4 text-xs font-bold tracking-widest outline-none focus:bg-white focus:border-black/20 transition-all"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 md:gap-8">
           <button 
             onClick={() => setView('dashboard')}
-            className="p-2 text-zinc-400 hover:text-black transition-all duration-300 relative group"
+            className="p-2 text-stone-600 hover:text-stone-950 transition-colors relative"
+            title="Watchlist"
           >
-            <Heart className={cn("w-5 h-5", favoritesCount > 0 && "fill-black text-black")} />
+            <Heart className={cn("w-4.5 h-4.5", favoritesCount > 0 ? "fill-stone-900 text-stone-900" : "text-stone-600")} />
+            {favoritesCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-stone-900 text-stone-50 text-[9px] font-sans font-bold flex items-center justify-center">
+                {favoritesCount}
+              </span>
+            )}
           </button>
 
-          <div className="hidden md:flex items-center gap-4 md:gap-8">
+          <div className="hidden md:flex items-center">
             {user ? (
-              <div className="flex items-center gap-4 md:gap-6">
-                <button 
-                  onClick={() => setView('dashboard')}
-                  className="flex items-center gap-3 group"
-                >
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden border border-black/5">
-                    <img 
-                      src={userProfile?.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.uid} 
-                      alt="Profile" 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <span className="hidden md:block text-xs font-bold text-zinc-500 group-hover:text-black transition-colors uppercase tracking-widest">
-                    {userProfile?.displayName?.split(' ')[0] || 'User'}
-                  </span>
-                </button>
-              </div>
+              <button 
+                onClick={() => setView('dashboard')}
+                className="flex items-center gap-2.5 border border-stone-300/80 bg-white/80 px-3.5 py-1.5 hover:border-stone-800 transition-colors group"
+              >
+                <div className="w-6 h-6 rounded-full overflow-hidden border border-stone-200">
+                  <img 
+                    src={userProfile?.photoURL || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.uid} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-[11px] font-sans font-medium text-stone-800 group-hover:text-stone-950 uppercase tracking-wider">
+                  {userProfile?.displayName?.split(' ')[0] || 'Collector'}
+                </span>
+              </button>
             ) : (
               <button 
                 onClick={onSignIn}
-                className="btn-primary !py-3 !px-6 !text-xs"
+                className="btn-primary !py-2.5 !px-5 !text-[10px]"
               >
-                Access
+                Member Sign In
               </button>
             )}
           </div>
 
           <button 
-            className="lg:hidden p-2 text-black hover:text-zinc-600 transition-colors"
+            className="lg:hidden p-2 text-stone-800 hover:text-stone-950 transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -996,129 +975,132 @@ const Hero = ({ onExplore, onConsign, featuredImageUrl, loading, isAdmin }: { on
   };
 
   return (
-    <section className="relative min-h-screen bg-paper overflow-hidden flex items-center">
-      {/* Background Image with Skeleton */}
-      <div className="absolute inset-0 z-0">
-        {loading ? (
-          <Skeleton className="w-full h-full rounded-none opacity-10" />
-        ) : (
-          <LazyImage 
-            src={featuredImageUrl} 
-            alt="Hero Background" 
-            className="w-full h-full object-cover opacity-[0.08] scale-110 blur-[1px]"
-          />
-        )}
+    <section className="relative min-h-[92vh] bg-[#faf8f5] overflow-hidden flex items-center border-b border-stone-200">
+      {/* Archival Paper Texture and Hairline Grid */}
+      <div className="absolute inset-0 z-0 opacity-10 pointer-events-none">
+        <LazyImage 
+          src={featuredImageUrl} 
+          alt="Hero Background" 
+          className="w-full h-full object-cover scale-105 filter grayscale contrast-125"
+        />
       </div>
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, var(--color-primary) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+      <div 
+        className="absolute inset-0 opacity-[0.035] pointer-events-none" 
+        style={{ 
+          backgroundImage: 'linear-gradient(to right, #171513 1px, transparent 1px), linear-gradient(to bottom, #171513 1px, transparent 1px)', 
+          backgroundSize: '48px 48px' 
+        }} 
+      />
       
-      <div className="max-w-[1800px] mx-auto px-6 md:px-12 w-full grid lg:grid-cols-2 gap-12 md:gap-20 items-center pt-32 md:pt-40 pb-24 md:pb-32 relative z-10">
+      <div className="max-w-[1700px] mx-auto px-6 md:px-12 w-full grid lg:grid-cols-[1.15fr_0.85fr] gap-12 lg:gap-20 items-center pt-32 md:pt-36 pb-20 md:pb-28 relative z-10">
         <motion.div 
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-          className="text-left space-y-8 md:space-y-12"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+          className="text-left space-y-8 md:space-y-10"
         >
-          <div className="space-y-4 md:space-y-6 max-w-full">
-            <div className="flex items-center gap-4">
-              <span className="w-8 md:w-12 h-[1px] bg-accent" />
-              <span className="text-accent text-[10px] md:text-base font-black tracking-[0.4em] md:tracking-[0.6em] uppercase">Private Treaty & Consignment</span>
+          <div className="space-y-4 max-w-2xl">
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-[1px] bg-amber-800" />
+              <span className="text-amber-900 text-xs font-sans font-semibold tracking-[0.25em] uppercase">
+                ESTATE ARCHIVES · VOLUME XXXIV
+              </span>
             </div>
-            <h2 className="text-4xl md:text-7xl lg:text-8xl font-serif font-black text-ink leading-[0.9] tracking-tighter uppercase break-words">
-              STRAWBOSS <br />
-              <span className="italic font-extralight text-ink/40 lowercase">premier</span> AUCTION
-            </h2>
-            <p className="text-base md:text-2xl font-serif italic text-ink/80 max-w-xl leading-relaxed">
-              Established 1992. The global standard for authenticated elite auctions and private treaties. Acquire the world's most significant artifacts.
+            
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-serif font-normal text-stone-900 leading-[1.04] tracking-tight">
+              The Architecture of <br />
+              <span className="italic font-normal text-stone-700">Historical Provenance</span>
+            </h1>
+
+            <p className="text-base sm:text-lg font-serif italic text-stone-600 max-w-xl leading-relaxed pt-2">
+              Established 1992. The global authority for authenticated antique auctions, private treaty treaties, and white-glove estate curation.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-10">
-            <motion.button 
-              whileHover={{ scale: 1.05, y: -5 }}
-              whileTap={{ scale: 0.95 }}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+            <button 
               onClick={onExplore}
-              className="w-full sm:w-auto bg-primary text-white px-10 md:px-16 py-5 md:py-6 text-sm md:text-base font-black tracking-[0.5em] uppercase hover:bg-ink transition-all duration-700 shadow-2xl"
+              className="btn-primary !px-9 !py-4 text-xs font-sans tracking-[0.2em]"
             >
-              Enter Gallery
-            </motion.button>
-            <motion.button 
-              whileHover={{ scale: 1.05, y: -5 }}
-              whileTap={{ scale: 0.95 }}
+              Explore Active Catalogues
+            </button>
+            <button 
               onClick={onConsign}
-              className="w-full sm:w-auto bg-white border border-black/10 text-black px-10 md:px-16 py-5 md:py-6 text-sm md:text-base font-black tracking-[0.5em] uppercase hover:bg-zinc-50 transition-all duration-700"
+              className="btn-outline !px-9 !py-4 text-xs font-sans tracking-[0.2em] bg-white/60"
             >
-              Consign Piece
-            </motion.button>
+              Consign an Artifact
+            </button>
           </div>
 
-          <div className="flex justify-between md:justify-start gap-8 md:gap-20 pt-8 border-t border-black/5">
-            <div className="space-y-1">
-              <span className="text-xl md:text-4xl font-serif font-black text-ink">98%</span>
-              <p className="text-[8px] md:text-xs uppercase tracking-widest font-black text-ink/40">Authentication</p>
+          {/* Institutional Ledger Metric Strip */}
+          <div className="grid grid-cols-3 gap-6 pt-8 border-t border-stone-200 max-w-xl">
+            <div className="space-y-0.5">
+              <span className="text-2xl sm:text-3xl font-serif font-medium text-stone-900 tabular-nums">99.8%</span>
+              <p className="text-[10px] uppercase tracking-[0.2em] font-sans font-medium text-stone-500">Certified Provenance</p>
             </div>
-            <div className="space-y-1">
-              <span className="text-xl md:text-4xl font-serif font-black text-ink">12k+</span>
-              <p className="text-[8px] md:text-xs uppercase tracking-widest font-black text-ink/40">Elite Members</p>
+            <div className="space-y-0.5 border-l border-stone-200 pl-6">
+              <span className="text-2xl sm:text-3xl font-serif font-medium text-stone-900 tabular-nums">12,400+</span>
+              <p className="text-[10px] uppercase tracking-[0.2em] font-sans font-medium text-stone-500">Vetted Collectors</p>
             </div>
-            <div className="space-y-1">
-              <span className="text-xl md:text-4xl font-serif font-black text-ink">$4.2B</span>
-              <p className="text-[8px] md:text-xs uppercase tracking-widest font-black text-ink/40">Total Sales</p>
+            <div className="space-y-0.5 border-l border-stone-200 pl-6">
+              <span className="text-2xl sm:text-3xl font-serif font-medium text-stone-900 tabular-nums">$4.2B</span>
+              <p className="text-[10px] uppercase tracking-[0.2em] font-sans font-medium text-stone-500">Curated Valuations</p>
             </div>
           </div>
         </motion.div>
 
-        {/* 3D Rotating Featured Lot */}
+        {/* Featured Lot Catalogue Presentation */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8, rotateY: 45 }}
-          animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-          transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
-          className="hidden lg:block perspective-[2000px]"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          className="hidden lg:block"
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
         >
-          <motion.div
-            animate={{ 
-              rotateX: rotate.x, 
-              rotateY: rotate.y,
-            }}
-            transition={{ type: 'spring', stiffness: 100, damping: 30 }}
-            className="relative aspect-[4/5] w-full max-w-md mx-auto bg-surface rounded-[3rem] shadow-[0_100px_200px_rgba(0,0,0,0.4)] overflow-hidden group border border-white/20"
-          >
-            <div className="absolute inset-0 z-0">
+          <div className="relative bg-white border border-stone-300/80 shadow-[0_24px_50px_-15px_rgba(23,21,19,0.08)] max-w-md mx-auto p-6 space-y-5">
+            {/* Museum Catalog Tag Header */}
+            <div className="flex justify-between items-baseline border-b border-stone-200 pb-3 text-[10px] font-sans uppercase tracking-[0.2em] text-stone-500">
+              <span className="text-stone-900 font-semibold">LOT NO. 402</span>
+              <span>LIVE BIDDING ACTIVE</span>
+            </div>
+
+            {/* Artwork Frame */}
+            <div className="relative aspect-[4/5] overflow-hidden bg-[#f4f2ee] flex items-center justify-center border border-stone-200/60 p-4">
               <LazyImage 
                 src={featuredImageUrl} 
                 alt="Featured Lot" 
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3s]"
+                imgClassName="max-h-full max-w-full object-contain shadow-md"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
             </div>
 
-            <div className="absolute top-10 left-10 z-10">
-              <div className="bg-accent text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3">
-                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                Featured Lot #402
+            {/* Artwork Metadata */}
+            <div className="space-y-2 pt-1">
+              <span className="text-[9px] uppercase tracking-[0.25em] text-amber-800 font-semibold block">
+                FINE ART & ANTIQUITIES
+              </span>
+              <h2 className="text-xl font-serif font-medium text-stone-900 leading-snug">
+                Imperial Ming Dynasty Cobalt Vase
+              </h2>
+              <p className="text-xs font-serif italic text-stone-500">
+                Jingdezhen Imperial Kilns, Xuande Period (1426–1435). Underglaze blue porcelain.
+              </p>
+            </div>
+
+            {/* Bidding Summary */}
+            <div className="pt-3 border-t border-stone-200 flex items-center justify-between">
+              <div>
+                <span className="text-[9px] uppercase tracking-widest text-stone-400 block font-sans">Current Valuation</span>
+                <span className="text-2xl font-serif font-medium text-stone-900 tabular-nums">$850,000 USD</span>
               </div>
+              <button 
+                onClick={onExplore}
+                className="btn-primary !px-5 !py-2.5 text-[10px] font-sans tracking-[0.18em]"
+              >
+                Place Bid
+              </button>
             </div>
-
-            <div className="absolute bottom-12 left-12 right-12 z-10 space-y-4">
-              <h3 className="text-3xl font-serif font-black text-white leading-none uppercase tracking-tighter">
-                Imperial Ming <br /> Dynasty Vase
-              </h3>
-              <div className="flex items-end justify-between">
-                <div className="space-y-1">
-                  <span className="text-[10px] uppercase tracking-[0.3em] font-black text-white/60">Current Valuation</span>
-                  <p className="text-4xl font-serif font-black text-white">$850,000</p>
-                </div>
-                <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center">
-                  <Gavel className="w-6 h-6 text-white" />
-                </div>
-              </div>
-            </div>
-
-            {/* Shine Effect */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-[1.5s] ease-in-out" />
-          </motion.div>
+          </div>
         </motion.div>
       </div>
     </section>
@@ -1199,129 +1181,113 @@ const ItemCard = ({
   return (
     <motion.div 
       layout
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative bg-white border border-black/[0.03] overflow-hidden cursor-pointer shadow-[0_10px_30px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] transition-all duration-700 rounded-none border-b-4 border-b-black/5"
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative bg-white border border-stone-200/90 hover:border-stone-400 overflow-hidden cursor-pointer shadow-none hover:shadow-[0_20px_40px_-15px_rgba(23,21,19,0.07)] transition-all duration-400 rounded-none flex flex-col"
       onClick={onClick}
     >
-      <div className="relative aspect-[4/5] overflow-hidden bg-[#f0f0f0]">
+      {/* Artwork Exhibition Frame */}
+      <div className="relative aspect-[4/5] overflow-hidden bg-[#f6f4f0] flex items-center justify-center p-3">
         <LazyImage 
           src={(item.images && item.images[0]) || `https://picsum.photos/seed/item-${item.id}/800/1000`} 
           alt={item.title}
           imgClassName={cn(
-            "img-fit transition-transform duration-[2s] ease-out",
+            "max-w-full max-h-full object-contain transition-transform duration-700 ease-out",
             isHovered ? "scale-105" : "scale-100"
           )}
         />
-        
-        {/* Floating Category Tag */}
-        <div className="absolute top-6 left-6 z-10 flex flex-col gap-1 items-start">
-          <span className="bg-black/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-[0.3em] px-3 py-1.5 shadow-xl">
-            {item.category}
-          </span>
-          {item.listingType === 'auction' ? (
-            <span className="bg-white/80 backdrop-blur-md text-black text-[8px] font-black uppercase tracking-[0.3em] px-3 py-1.5 shadow-xl border border-black/5">
-              Live Auction
-            </span>
-          ) : (
-            <span className="bg-white/80 backdrop-blur-md text-black text-[8px] font-black uppercase tracking-[0.3em] px-3 py-1.5 shadow-xl border border-black/5">
-              Private Treaty
-            </span>
-          )}
-        </div>
 
-        {/* Action Controls Column */}
-        <div className="absolute top-6 right-6 z-20 flex flex-col gap-3">
-          {/* Favorite Button */}
+        {/* Minimal Action Controls */}
+        <div className="absolute top-3.5 right-3.5 z-20 flex flex-col gap-2">
           <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.94 }}
             onClick={(e) => {
               e.stopPropagation();
               onToggleFavorite(e);
             }}
             className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 shadow-md",
-              isFavorite ? "bg-black text-white" : "bg-white/60 hover:bg-white text-black backdrop-blur-md border border-black/10"
+              "w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm",
+              isFavorite 
+                ? "bg-stone-900 text-stone-50" 
+                : "bg-white/85 hover:bg-white text-stone-700 backdrop-blur-sm border border-stone-200"
             )}
+            title={isFavorite ? "Remove from watchlist" : "Add to watchlist"}
           >
-            <Heart className={cn("w-4 h-4", isFavorite && "fill-current")} />
+            <Heart className={cn("w-3.5 h-3.5", isFavorite && "fill-current")} />
           </motion.button>
 
-          {/* Add to Curated Print Catalog */}
           {onTogglePrint && (
             <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.94 }}
               onClick={(e) => {
                 e.stopPropagation();
                 onTogglePrint(e);
               }}
               className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 shadow-md",
-                isSelectedForPrint ? "bg-accent text-white" : "bg-white/60 hover:bg-white text-black backdrop-blur-md border border-black/10"
+                "w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-sm",
+                isSelectedForPrint 
+                  ? "bg-amber-900 text-stone-50" 
+                  : "bg-white/85 hover:bg-white text-stone-700 backdrop-blur-sm border border-stone-200"
               )}
               title="Add to Curated Print Catalog"
             >
-              <Printer className="w-4 h-4" />
+              <Printer className="w-3.5 h-3.5" />
             </motion.button>
           )}
         </div>
-
-        {/* View Details Overlay */}
-        <div className={cn(
-          "absolute inset-0 bg-black/5 transition-opacity duration-700 flex items-center justify-center",
-          isHovered ? "opacity-100" : "opacity-0"
-        )}>
-          <div className="w-8 h-8 sm:w-16 sm:h-16 rounded-full border border-white/30 flex items-center justify-center text-white backdrop-blur-sm">
-             <Plus className="w-3 h-3 sm:w-6 sm:h-6" />
-          </div>
-        </div>
       </div>
 
-      <div className="p-2 sm:p-4 md:p-8 space-y-2 sm:space-y-4 md:space-y-6 relative bg-white">
-        {/* Decorative corner mark */}
-        <div className="absolute top-0 right-0 w-4 h-4 sm:w-8 sm:h-8 border-t border-r border-black/5 pointer-events-none" />
-        
-        <div className="space-y-0.5 sm:space-y-1 md:space-y-2">
-          <div className="flex items-center gap-1 sm:gap-2">
-             <span className="text-[7px] sm:text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-black/30">Archives</span>
-             <span className="w-2 sm:w-4 h-[1px] bg-black/10" />
+      {/* Accession Details Block */}
+      <div className="p-4 sm:p-5 md:p-6 space-y-3 bg-white flex-1 flex flex-col justify-between border-t border-stone-100">
+        <div className="space-y-1.5">
+          {/* Unboxed Metadata Kicker (Zero-Pill Discipline) */}
+          <div className="flex items-center gap-1.5 text-[9px] font-sans uppercase tracking-[0.2em] text-stone-500">
+            <span>LOT {item.id.slice(-4).toUpperCase()}</span>
+            <span>·</span>
+            <span className="text-stone-700 font-medium">{item.category}</span>
+            <span>·</span>
+            <span className={item.listingType === 'auction' ? "text-amber-800 font-semibold" : "text-stone-500"}>
+              {item.listingType === 'auction' ? 'LIVE BID' : 'PRIVATE TREATY'}
+            </span>
           </div>
-          <h3 className="text-xs sm:text-lg md:text-2xl font-serif font-medium text-black tracking-tight leading-tight group-hover:italic transition-all duration-500 truncate">
+
+          <h3 className="text-sm sm:text-base md:text-lg font-serif font-medium text-stone-900 leading-snug group-hover:text-amber-900 transition-colors line-clamp-1">
             {item.title}
           </h3>
         </div>
 
-        <div className="flex justify-between items-end pt-2 sm:pt-4 border-t border-black/[0.03]">
+        {/* Valuation and Bid Ledger */}
+        <div className="flex justify-between items-baseline pt-3 border-t border-stone-100">
           <div className="space-y-0.5">
-            <span className="text-[7px] sm:text-[9px] font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] text-black/40 block">
-              {item.listingType === 'auction' ? 'Valuation' : 'Price'}
+            <span className="text-[8px] sm:text-[9px] font-sans uppercase tracking-[0.2em] text-stone-400 block font-medium">
+              {item.listingType === 'auction' ? 'Current Bid' : 'Asking Price'}
             </span>
-            <span className="text-xs sm:text-xl font-display font-medium text-black">
-              ${(item.listingType === 'auction' ? (item.currentBid || item.price) : item.price)?.toLocaleString()}
+            <span className="text-base sm:text-lg md:text-xl font-serif font-medium text-stone-900 tabular-nums">
+              ${(item.listingType === 'auction' ? (item.currentBid || item.price) : item.price)?.toLocaleString()} <span className="text-[10px] font-sans text-stone-400 font-normal">USD</span>
             </span>
           </div>
 
-          <div className="flex flex-col items-end gap-1">
-             {item.listingType === 'auction' && (
-               <div className="flex items-center gap-1 px-1.5 py-0.5 sm:px-3 sm:py-1 bg-zinc-50 border border-black/5">
-                  <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-red-500 animate-pulse" />
-                  <span className="text-[6px] sm:text-[8px] font-black uppercase tracking-widest text-black/50">{item.bidCount} Bids</span>
-               </div>
-             )}
-             <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-black/20 group-hover:text-black group-hover:translate-x-1 transition-all duration-500" />
+          <div className="flex items-center gap-2">
+            {item.listingType === 'auction' && (
+              <span className="text-[9px] font-sans tracking-wider text-stone-500 font-medium">
+                {item.bidCount} {item.bidCount === 1 ? 'bid' : 'bids'}
+              </span>
+            )}
+            <ChevronRight className="w-3.5 h-3.5 text-stone-400 group-hover:text-stone-900 group-hover:translate-x-0.5 transition-all" />
           </div>
         </div>
 
         {onEdit && (
           <button 
             onClick={onEdit}
-            className="absolute -top-4 right-8 w-8 h-8 bg-black text-white rounded-none flex items-center justify-center shadow-2xl hover:scale-110 transition-transform"
+            className="absolute top-3 left-3 w-7 h-7 bg-stone-900 text-white flex items-center justify-center shadow-md hover:scale-105 transition-transform"
+            title="Edit listing"
           >
             <Edit3 className="w-3 h-3" />
           </button>
@@ -1536,52 +1502,58 @@ const Archives = ({
   }, [filteredItems, sortBy]);
 
   return (
-    <section className="relative min-h-screen pt-16 md:pt-40 pb-24 md:pb-40 visible-grid">
-      <div className="max-w-[1500px] mx-auto px-4 md:px-6 space-y-12 md:space-y-24">
+    <section className="relative min-h-screen pt-24 md:pt-36 pb-24 md:pb-40 bg-[#faf8f5]">
+      <div className="max-w-[1700px] mx-auto px-4 sm:px-6 md:px-12 space-y-10 md:space-y-16">
         
         {/* Gallery Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 md:gap-12">
-          <div className="space-y-6 md:space-y-10">
-            <div className="flex items-center gap-4">
-              <span className="w-12 md:w-16 h-[1px] bg-black" />
-              <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.6em] text-black">Established archives</span>
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-stone-200">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-[1px] bg-amber-800" />
+              <span className="text-[10px] md:text-xs font-sans font-semibold uppercase tracking-[0.25em] text-amber-900">
+                ACTIVE AUCTION CATALOGUE & PRIVATE TREATY VAULTS
+              </span>
             </div>
-            <h2 className="text-4xl md:text-9xl font-serif font-medium text-black tracking-tighter leading-[0.85] uppercase">
-              The <br/>
-              <span className="italic font-light text-black/20">Marketplace</span>
-            </h2>
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-normal text-stone-900 tracking-tight leading-tight">
+              Curated Masterpiece Register
+            </h1>
+            <p className="text-sm font-serif italic text-stone-600 max-w-xl">
+              Authentic provenance guaranteed on all catalogued lots. Scientific condition certificates available upon consignor request.
+            </p>
           </div>
           
-          <div className="flex flex-col gap-6 md:items-end">
-            <div className="flex items-center gap-2 md:gap-4 bg-white/50 backdrop-blur-md p-1 md:p-2 border border-black/5 overflow-x-auto no-scrollbar max-w-full">
+          <div className="flex flex-col gap-4 md:items-end">
+            {/* Filter Navigation Tabs */}
+            <div className="flex items-center gap-1 sm:gap-2 bg-white border border-stone-300/80 p-1 overflow-x-auto no-scrollbar max-w-full">
               {['all', 'Trending', 'Fine Art', 'Timepieces', 'Furniture', 'Jewelry'].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setFilterType(cat)}
                   className={cn(
-                    "px-4 md:px-6 py-2 md:py-3 text-[9px] md:text-[10px] font-black tracking-[0.3em] uppercase transition-all duration-500 whitespace-nowrap",
+                    "px-3.5 py-1.5 text-[10px] sm:text-[11px] font-sans font-medium uppercase tracking-[0.16em] transition-colors whitespace-nowrap",
                     filterType === cat 
-                      ? "bg-black text-white shadow-xl" 
-                      : "text-black/30 hover:text-black"
+                      ? "bg-stone-900 text-stone-50" 
+                      : "text-stone-600 hover:text-stone-950"
                   )}
                 >
-                  {cat}
+                  {cat === 'all' ? 'All Lots' : cat}
                 </button>
               ))}
             </div>
 
-            <div className="flex items-center gap-2 md:gap-4">
-              <div className="relative group">
+            {/* Sort & Utility Row */}
+            <div className="flex items-center gap-3">
+              <div className="relative">
                 <select 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="bg-white border border-black/5 px-6 md:px-8 py-3 md:py-4 text-[9px] md:text-[10px] font-black tracking-[0.3em] uppercase appearance-none cursor-pointer pr-12 md:pr-16 focus:border-black outline-none transition-all text-black shadow-sm"
+                  className="bg-white border border-stone-300/80 px-4 py-2 text-[10px] sm:text-xs font-sans font-medium uppercase tracking-[0.15em] appearance-none cursor-pointer pr-9 focus:border-stone-900 outline-none text-stone-800 transition-colors"
                 >
-                  <option value="newest">Newest First</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
+                  <option value="newest">Sort: Newest Lots</option>
+                  <option value="price-low">Valuation: Low to High</option>
+                  <option value="price-high">Valuation: High to Low</option>
                 </select>
-                <ChevronRight className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 w-3 md:w-4 h-3 md:h-4 rotate-90 text-black/20 pointer-events-none" />
+                <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rotate-90 text-stone-400 pointer-events-none" />
               </div>
 
               <button 
@@ -1593,18 +1565,20 @@ const Archives = ({
                   }
                   window.print();
                 }}
-                className="px-6 md:px-8 py-3 md:py-4 bg-accent text-white text-[9px] md:text-[10px] font-black tracking-[0.3em] uppercase flex items-center gap-3 transition-all hover:bg-zinc-800 shadow-xl no-print"
+                className="px-4 py-2 bg-white border border-stone-300 text-stone-800 text-[10px] sm:text-xs font-sans font-medium tracking-[0.15em] uppercase flex items-center gap-2 hover:bg-stone-900 hover:text-white transition-colors no-print"
+                title="Print Curated Dossier"
               >
-                <Printer className="w-3 md:w-4 h-3 md:h-4" />
-                <span className="hidden md:inline">Print Catalog ({printSelectedIds?.length || 0})</span>
+                <Printer className="w-3.5 h-3.5" />
+                <span>Print Dossier ({printSelectedIds?.length || 0})</span>
               </button>
 
               <button 
                 onClick={onRefresh}
                 disabled={loading}
-                className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center bg-white border border-black/5 text-black hover:bg-black hover:text-white transition-all shadow-sm"
+                className="w-8 h-8 flex items-center justify-center bg-white border border-stone-300 text-stone-700 hover:text-stone-950 hover:border-stone-800 transition-colors"
+                title="Refresh lots"
               >
-                <RefreshCw className={cn("w-3 md:w-4 h-3 md:h-4", loading && "animate-spin")} />
+                <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
               </button>
             </div>
           </div>
@@ -2662,6 +2636,51 @@ const ItemDetail = ({
   const [selectedImage, setSelectedImage] = useState(item.images[0] || `https://picsum.photos/seed/${item.id}/1200/1500`);
   const [rotate, setRotate] = useState({ x: 0, y: 0 });
   const [showHammer, setShowHammer] = useState(false);
+  const [isZoomOpen, setIsZoomOpen] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareTitle = `Strawboss Archives: ${item.title}`;
+    const shareText = `Discover this rare piece on Strawboss Archives: ${item.title}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl
+        });
+        return;
+      } catch (err) {
+        // Fallback to custom modal
+      }
+    }
+    setShowShareModal(true);
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
+
+  const handleShareInstagram = () => {
+    const caption = `Rare piece from Strawboss Archives: ${item.title} ($${(item.currentBid || item.price || 0).toLocaleString()})\n\nExplore at: ${window.location.href} #vintage #antiques #rarecollection #strawboss`;
+    navigator.clipboard.writeText(caption);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+    window.open('https://www.instagram.com', '_blank');
+  };
+
+  const handleShareTikTok = () => {
+    const caption = `Look at this incredible archival find on Strawboss: ${item.title} ✨ #rare #collector #history #antiques #auction`;
+    navigator.clipboard.writeText(caption);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+    window.open('https://www.tiktok.com', '_blank');
+  };
 
   const handleImageMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -2827,6 +2846,96 @@ const ItemDetail = ({
             onConfirm={handleConfirmPurchase} 
           />
         )}
+        {showShareModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[130] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setShowShareModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-paper border border-black/10 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative space-y-6"
+            >
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="absolute top-5 right-5 w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center text-ink/60 transition-all cursor-pointer"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">Curated Discovery</span>
+                <h3 className="text-xl font-serif font-black text-primary uppercase">Share This Acquisition</h3>
+                <p className="text-xs text-ink/70">Share this authenticated archival piece with your network or followers.</p>
+              </div>
+
+              <div className="space-y-3">
+                {/* Instagram Option */}
+                <button
+                  onClick={handleShareInstagram}
+                  className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-[#f09433]/10 via-[#e6683c]/10 to-[#bc1888]/10 hover:from-[#f09433]/20 hover:via-[#e6683c]/20 hover:to-[#bc1888]/20 border border-[#e6683c]/20 transition-all group cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] flex items-center justify-center text-white shadow-md">
+                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-black uppercase tracking-wider text-primary">Share to Instagram</p>
+                      <p className="text-[10px] text-ink/60">Copies caption + tags & opens app</p>
+                    </div>
+                  </div>
+                  <ArrowUpRight className="w-4 h-4 text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </button>
+
+                {/* TikTok Option */}
+                <button
+                  onClick={handleShareTikTok}
+                  className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-black/5 hover:bg-black/10 border border-black/10 transition-all group cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center shadow-md">
+                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z"/>
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-black uppercase tracking-wider text-primary">Share to TikTok</p>
+                      <p className="text-[10px] text-ink/60">Copies post hook & opens TikTok</p>
+                    </div>
+                  </div>
+                  <ArrowUpRight className="w-4 h-4 text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </button>
+
+                {/* Copy Link Option */}
+                <button
+                  onClick={handleCopyLink}
+                  className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white hover:bg-stone-50 border border-black/10 shadow-sm transition-all group cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-stone-100 text-primary flex items-center justify-center">
+                      {copiedLink ? <Check className="w-5 h-5 text-emerald-600" /> : <Copy className="w-5 h-5 text-ink/80" />}
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-black uppercase tracking-wider text-primary">
+                        {copiedLink ? 'Link Copied to Clipboard!' : 'Copy Direct Link'}
+                      </p>
+                      <p className="text-[10px] text-ink/60">Direct archival permalink</p>
+                    </div>
+                  </div>
+                  {copiedLink && <span className="text-[10px] font-black uppercase text-emerald-600 tracking-wider">Copied</span>}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Mobile Sticky Action Bar - Amazon Style */}
@@ -2853,118 +2962,200 @@ const ItemDetail = ({
         </button>
       </div>
 
-      <div className="max-w-[1800px] mx-auto px-4 md:px-12 pt-24 md:pt-32">
-        <button onClick={onBack} className="group flex items-center gap-4 text-xs md:text-base font-black uppercase tracking-[0.4em] text-ink/80 hover:text-primary transition-all mb-8 md:mb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-16">
+        <button onClick={onBack} className="group flex items-center gap-3 text-xs md:text-sm font-black uppercase tracking-[0.35em] text-ink/70 hover:text-primary transition-all mb-6 md:mb-10">
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-2 transition-transform" />
           Back to Archives
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-12 md:gap-24 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           {/* Left Column: Thumbnails and Main Image */}
-          <div className="flex flex-col-reverse md:flex-row gap-6 md:gap-8">
-            {/* Vertical Thumbnails */}
-            <div className="flex md:flex-col gap-3 md:gap-4 overflow-x-auto md:overflow-y-auto md:max-h-[800px] scrollbar-hide pb-4 md:pb-0">
-              {item.images.map((img, idx) => (
-                <button 
-                  key={idx}
-                  onClick={() => {
-                    setSelectedImage(img);
+          <div className="lg:col-span-7 space-y-4">
+            <div className="flex flex-col-reverse md:flex-row gap-4 md:gap-5 items-start">
+              {/* Thumbnails */}
+              <div className="flex md:flex-col gap-2.5 overflow-x-auto md:overflow-y-auto max-w-full md:max-h-[480px] scrollbar-hide pb-2 md:pb-0 flex-shrink-0">
+                {item.images.map((img, idx) => (
+                  <button 
+                    key={idx}
+                    onClick={() => {
+                      setSelectedImage(img);
+                    }}
+                    className={cn(
+                      "w-14 h-14 md:w-16 md:h-16 flex-shrink-0 rounded-xl overflow-hidden border-2 bg-stone-100 p-1 transition-all cursor-pointer",
+                      (selectedImage === img) ? "border-accent shadow-md ring-2 ring-accent/30" : "border-black/5 opacity-60 hover:opacity-100"
+                    )}
+                    aria-label={`Select photo ${idx + 1}`}
+                  >
+                    <img src={img} alt={`${item.title} view ${idx + 1}`} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                  </button>
+                ))}
+              </div>
+
+              {/* Main Image Frame - Bound to safe height with object-contain so it is NEVER cut in half */}
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative flex-1 w-full h-[360px] sm:h-[420px] md:h-[480px] rounded-2xl md:rounded-3xl overflow-hidden bg-gradient-to-b from-[#fbfaf7] via-[#f4f0e6] to-[#eae4d5] border border-black/10 shadow-xl group perspective-[2000px] flex items-center justify-center p-4 md:p-6 select-none"
+                onMouseMove={handleImageMouseMove}
+                onMouseLeave={handleImageMouseLeave}
+              >
+                {/* Soft ambient depth backdrop */}
+                <div 
+                  className="absolute inset-0 bg-cover bg-center blur-2xl opacity-20 scale-110 pointer-events-none" 
+                  style={{ backgroundImage: `url(${selectedImage})` }} 
+                />
+
+                <motion.div
+                  animate={{ 
+                    rotateX: rotate.x, 
+                    rotateY: rotate.y,
                   }}
-                  className={cn(
-                    "w-16 h-20 md:w-24 md:h-32 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all",
-                    (selectedImage === img) ? "border-accent shadow-lg" : "border-transparent opacity-60 hover:opacity-100"
-                  )}
+                  transition={{ type: 'spring', stiffness: 100, damping: 30 }}
+                  className="relative z-10 w-full h-full flex items-center justify-center cursor-zoom-in"
+                  onClick={() => setIsZoomOpen(true)}
+                  title="Click to view high-resolution photo"
                 >
-                  <img src={img} alt={`${item.title} view ${idx + 1}`} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  <img 
+                    src={selectedImage} 
+                    alt={item.title} 
+                    className="max-w-full max-h-full w-auto h-auto object-contain filter drop-shadow-2xl transition-transform duration-300 group-hover:scale-[1.02]" 
+                    referrerPolicy="no-referrer"
+                  />
+                  {/* Subtle shine effect on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-[1.2s] pointer-events-none" />
+                </motion.div>
+
+                {/* Hammer Animation Overlay */}
+                <AnimatePresence>
+                  {showHammer && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.5, rotate: -45 }}
+                      animate={{ opacity: 1, scale: 1.5, rotate: 0 }}
+                      exit={{ opacity: 0, scale: 2, rotate: 45 }}
+                      className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none"
+                    >
+                      <div className="bg-accent/90 backdrop-blur-xl p-10 rounded-full shadow-[0_0_100px_rgba(225,29,72,0.5)]">
+                        <Gavel className="w-20 h-20 text-white" />
+                        <motion.p 
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-white font-black uppercase tracking-[0.4em] mt-3 text-center text-xs"
+                        >
+                          Valuation Accepted
+                        </motion.p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Live Status Badge */}
+                <div className="absolute top-4 left-4 z-20">
+                  <div className="bg-accent text-white px-3.5 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.25em] flex items-center gap-2 shadow-md">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    Live Valuation
+                  </div>
+                </div>
+                
+                {/* Watchlist Heart Button */}
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleFavorite(item.id, e);
+                  }}
+                  className="absolute top-4 right-4 z-20 w-11 h-11 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-105 transition-all group/heart text-primary"
+                  title="Save to watchlist"
+                  aria-label="Save to watchlist"
+                >
+                  <Heart className={cn(
+                    "w-5 h-5 transition-colors",
+                    favorites.includes(item.id) ? "fill-accent text-accent" : "text-primary group-hover/heart:text-accent"
+                  )} />
                 </button>
-              ))}
+
+                {/* Zoom / Fullscreen Button */}
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsZoomOpen(true);
+                  }}
+                  className="absolute bottom-4 right-4 z-20 w-11 h-11 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-105 transition-all text-primary"
+                  title="Expand Fullscreen"
+                  aria-label="Expand Fullscreen"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+              </motion.div>
             </div>
 
-            {/* Main Image Container */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="relative flex-1 aspect-[3/4] md:aspect-[4/5] rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-paper shadow-2xl group perspective-[2000px]"
-              onMouseMove={handleImageMouseMove}
-              onMouseLeave={handleImageMouseLeave}
-            >
-              <motion.div
-                animate={{ 
-                  rotateX: rotate.x, 
-                  rotateY: rotate.y,
-                }}
-                transition={{ type: 'spring', stiffness: 100, damping: 30 }}
-                className="w-full h-full"
-              >
-                <img 
-                  src={selectedImage} 
-                  alt={item.title} 
-                  className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105" 
-                  referrerPolicy="no-referrer"
-                />
-                {/* Shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-[1.5s]" />
-              </motion.div>
+            {/* Museum & Provenance Trust Strip */}
+            <div className="grid grid-cols-3 gap-2 pt-1 text-center">
+              <div className="bg-white/70 backdrop-blur-sm border border-black/5 rounded-xl p-2.5 flex flex-col items-center justify-center">
+                <ShieldCheck className="w-4 h-4 text-accent mb-1" />
+                <span className="text-[9px] font-black uppercase tracking-wider text-primary">100% Authentic</span>
+                <span className="text-[8px] text-ink/50">Verified Provenance</span>
+              </div>
+              <div className="bg-white/70 backdrop-blur-sm border border-black/5 rounded-xl p-2.5 flex flex-col items-center justify-center">
+                <Package className="w-4 h-4 text-accent mb-1" />
+                <span className="text-[9px] font-black uppercase tracking-wider text-primary">Conservation Grade</span>
+                <span className="text-[8px] text-ink/50">Archival Care</span>
+              </div>
+              <div className="bg-white/70 backdrop-blur-sm border border-black/5 rounded-xl p-2.5 flex flex-col items-center justify-center">
+                <Truck className="w-4 h-4 text-accent mb-1" />
+                <span className="text-[9px] font-black uppercase tracking-wider text-primary">Insured Courier</span>
+                <span className="text-[8px] text-ink/50">Global Priority</span>
+              </div>
+            </div>
 
-              {/* Hammer Animation Overlay */}
-              <AnimatePresence>
-                {showHammer && (
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.5, rotate: -45 }}
-                    animate={{ opacity: 1, scale: 1.5, rotate: 0 }}
-                    exit={{ opacity: 0, scale: 2, rotate: 45 }}
-                    className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none"
+            {/* High Resolution Lightbox Modal */}
+            <AnimatePresence>
+              {isZoomOpen && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-[120] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-4 md:p-8"
+                  onClick={() => setIsZoomOpen(false)}
+                >
+                  <button
+                    onClick={() => setIsZoomOpen(false)}
+                    className="absolute top-6 right-6 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-all cursor-pointer"
+                    aria-label="Close high-res view"
                   >
-                    <div className="bg-accent/90 backdrop-blur-xl p-12 rounded-full shadow-[0_0_100px_rgba(225,29,72,0.5)]">
-                      <Gavel className="w-24 h-24 text-white" />
-                      <motion.p 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-white font-black uppercase tracking-[0.5em] mt-4 text-center"
-                      >
-                        Valuation Accepted
-                      </motion.p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Live Status Badge */}
-              <div className="absolute top-8 left-8 z-30">
-                <div className="bg-accent text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.3em] flex items-center gap-3 shadow-xl">
-                  <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                  Live Valuation
-                </div>
-              </div>
-              
-              {/* Badges and Icons */}
-              <button 
-                onClick={(e) => onToggleFavorite(item.id, e)}
-                className="absolute top-8 right-8 w-14 h-14 bg-paper/80 backdrop-blur-xl rounded-full flex items-center justify-center shadow-xl hover:bg-paper transition-all group/heart"
-              >
-                <Heart className={cn(
-                  "w-6 h-6 transition-colors",
-                  favorites.includes(item.id) ? "fill-accent text-accent" : "text-primary group-hover/heart:text-accent"
-                )} />
-              </button>
-
-              <div className="absolute bottom-8 right-8">
-                <button className="w-14 h-14 bg-paper/80 backdrop-blur-xl rounded-full flex items-center justify-center shadow-xl hover:bg-paper transition-all">
-                  <Search className="w-6 h-6 text-primary" />
-                </button>
-              </div>
-            </motion.div>
+                    <X className="w-6 h-6" />
+                  </button>
+                  <div className="max-w-4xl max-h-[82vh] flex items-center justify-center p-2" onClick={(e) => e.stopPropagation()}>
+                    <img
+                      src={selectedImage}
+                      alt={item.title}
+                      className="max-w-full max-h-[82vh] object-contain rounded-xl shadow-2xl"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  <p className="text-white/70 text-xs font-serif mt-4 text-center">
+                    {item.title} • Strawboss Archival Master View
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Right Column: Product Details */}
-          <div className="space-y-8 md:space-y-12">
+          <div className="lg:col-span-5 space-y-6 md:space-y-8">
             <div className="space-y-4 md:space-y-6">
               <div className="space-y-2">
                 <p className="text-accent font-black text-xs md:text-base uppercase tracking-[0.6em]">STRAWBOSS ARCHIVES</p>
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-start justify-between gap-4">
                   <h1 className="text-2xl md:text-3xl font-serif font-black text-primary tracking-tighter leading-tight uppercase">
                     {item.title}
                   </h1>
+                  <button
+                    onClick={handleShare}
+                    className="flex-shrink-0 flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/90 hover:bg-white border border-black/10 shadow-sm text-xs font-black uppercase tracking-wider text-primary hover:text-accent transition-all cursor-pointer"
+                    title="Share item on Instagram, TikTok, or copy link"
+                  >
+                    <Share2 className="w-4 h-4 text-accent" />
+                    <span className="hidden sm:inline">Share</span>
+                  </button>
                 </div>
               </div>
 
@@ -2979,90 +3170,105 @@ const ItemDetail = ({
                 </span>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 md:gap-4">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] uppercase tracking-[0.4em] font-black text-ink/40 mb-2">Acquisition Price</span>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-3xl md:text-4xl font-black text-accent">$</span>
-                      <span className="text-4xl md:text-8xl font-serif font-black text-accent tracking-tighter">
-                        {(item.listingType === 'auction' ? item.currentBid : item.price)?.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex flex-col justify-end pb-2">
-                    <span className="text-lg md:text-2xl font-serif text-primary/20 line-through">
-                      ${originalPrice.toLocaleString()}
+              <div className="space-y-4 pt-2">
+                <div className="space-y-1">
+                  <span className="text-[10px] uppercase tracking-[0.25em] font-sans font-medium text-stone-500">
+                    {item.listingType === 'auction' ? 'Current Live Reserve' : 'Private Treaty Valuation'}
+                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl sm:text-5xl font-serif font-medium text-stone-900 tabular-nums">
+                      ${(item.listingType === 'auction' ? item.currentBid : item.price)?.toLocaleString()}
                     </span>
-                    <span className="bg-accent/10 text-accent px-2 md:px-3 py-1 rounded-full text-xs md:text-base font-black uppercase tracking-widest w-fit">
-                      {discountPercent}% OFF
-                    </span>
+                    <span className="text-sm font-sans font-medium text-stone-500 uppercase tracking-widest">USD</span>
                   </div>
                 </div>
-                <p className="text-[10px] md:text-base font-black text-primary/30 uppercase tracking-[0.4em]">Limited-Time Acquisition Opportunity</p>
+
+                <div className="flex items-center gap-4 text-xs font-sans text-stone-600 pt-1">
+                  <span className="flex items-center gap-1.5 text-stone-700">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-amber-800" />
+                    <span>Reserve Condition Met</span>
+                  </span>
+                  <span>·</span>
+                  <span>Buyer's Premium: Standard 12%</span>
+                  {item.listingType === 'auction' && (
+                    <>
+                      <span>·</span>
+                      <span className="font-medium text-stone-900">{item.bidCount} Registered Bids</span>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="space-y-8 pt-4">
+            {/* Auction Paddle & Action Deck */}
+            <div className="space-y-6 pt-2">
               {item.listingType === 'auction' && (
-                <div className="bg-primary/5 p-8 rounded-3xl border border-primary/10 space-y-6">
+                <div className="bg-[#f7f5f1] p-5 sm:p-6 border border-stone-200/90 space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-black uppercase tracking-widest text-ink/60">Auction Ends In</span>
+                    <span className="text-[10px] font-sans font-semibold uppercase tracking-[0.2em] text-stone-600">
+                      Live Hammer Countdown
+                    </span>
                     <CountdownTimer endTime={item.endTime} />
                   </div>
-                  <div className="flex justify-between items-center pt-4 border-t border-primary/10">
-                    <span className="text-xs font-black uppercase tracking-widest text-ink/60">Current Bidder</span>
-                    <span className="text-sm font-serif italic text-primary">{item.lastBidderUid ? 'Elite Member #'+item.lastBidderUid.slice(0,4) : 'No Bids Yet'}</span>
+                  <div className="flex justify-between items-center pt-3 border-t border-stone-200 text-xs font-sans">
+                    <span className="text-stone-500">Highest Bid Paddle</span>
+                    <span className="font-serif italic text-stone-900">
+                      {item.lastBidderUid ? 'Verified Collector #' + item.lastBidderUid.slice(0, 5).toUpperCase() : 'Awaiting Opening Bid'}
+                    </span>
                   </div>
                 </div>
               )}
 
               {item.status === 'active' ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-4">
                   {item.listingType === 'buy-now' ? (
-                    <>
-                      <motion.button 
-                        whileHover={{ scale: 1.02, y: -5 }}
-                        whileTap={{ scale: 0.98 }}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <button 
                         onClick={() => setShowCheckout(true)}
-                        className="bg-primary text-white py-6 md:py-8 rounded-2xl text-sm md:text-base font-black tracking-[0.6em] uppercase shadow-2xl hover:bg-accent transition-all duration-700"
+                        className="btn-primary !py-4 text-xs font-sans tracking-[0.2em]"
                       >
-                        Private Treaty Acquisition
-                      </motion.button>
-                      <motion.button 
-                        whileHover={{ scale: 1.02, y: -5 }}
-                        whileTap={{ scale: 0.98 }}
+                        Acquire via Private Treaty
+                      </button>
+                      <button 
                         onClick={() => onToggleFavorite(item.id)}
                         className={cn(
-                          "bg-paper text-primary border-2 py-6 md:py-8 rounded-2xl text-sm md:text-base font-black tracking-[0.6em] uppercase transition-all duration-700",
-                          isWatching ? "border-accent text-accent" : "border-primary hover:bg-primary hover:text-white"
+                          "btn-outline !py-4 text-xs font-sans tracking-[0.2em] bg-white",
+                          isWatching ? "border-amber-900 text-amber-900" : ""
                         )}
                       >
-                        {isWatching ? 'Watching' : 'Watch Piece'}
-                      </motion.button>
-                    </>
+                        {isWatching ? 'Saved to Watchlist' : 'Add to Watchlist'}
+                      </button>
+                    </div>
                   ) : (
-                    <div className="col-span-1 sm:col-span-2 space-y-6">
-                      <div className="relative group">
-                        <span className="absolute left-8 top-1/2 -translate-y-1/2 text-accent font-serif text-2xl opacity-40 group-focus-within:opacity-100 transition-opacity">$</span>
+                    <div className="space-y-3">
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500 font-serif text-lg">$</span>
                         <input 
                           id="bid-input"
                           type="number" 
-                          className="w-full bg-paper border-2 border-transparent py-6 md:py-8 pl-16 pr-8 outline-none focus:border-accent font-serif text-xl md:text-2xl rounded-2xl transition-all"
-                          placeholder="Enter Elite Bid"
+                          className="w-full bg-white border border-stone-300 py-3.5 pl-9 pr-4 outline-none focus:border-stone-900 font-serif text-lg text-stone-900 rounded-none transition-colors"
+                          placeholder={`Enter bid amount (Min. $${((item.currentBid || 0) + 500).toLocaleString()})`}
                           value={bidAmount}
                           onChange={e => setBidAmount(e.target.value)}
                         />
                       </div>
-                      <motion.button 
-                        whileHover={{ scale: 1.02, y: -5 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handlePlaceBid}
-                        className="w-full bg-primary text-white py-8 rounded-2xl text-base font-black tracking-[0.6em] uppercase shadow-2xl hover:bg-accent transition-all duration-700"
-                      >
-                        Place Valuation
-                      </motion.button>
+                      <div className="flex items-center gap-3">
+                        <button 
+                          onClick={handlePlaceBid}
+                          className="flex-1 btn-primary !py-4 text-xs font-sans tracking-[0.2em]"
+                        >
+                          Submit Formal Bid Paddle
+                        </button>
+                        <button 
+                          onClick={() => onToggleFavorite(item.id)}
+                          className={cn(
+                            "btn-outline !py-4 !px-6 text-xs font-sans tracking-[0.15em] bg-white whitespace-nowrap",
+                            isWatching ? "border-amber-900 text-amber-900" : ""
+                          )}
+                        >
+                          {isWatching ? 'Watching' : 'Watch'}
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -5336,142 +5542,182 @@ export default function App() {
                 isAdmin={isAdmin}
               />
 
-              {/* Category Section */}
-              <section className="py-20 md:py-32 px-4 md:px-8 max-w-7xl mx-auto">
-                <div className="text-center mb-16 space-y-4">
-                  <span className="text-accent text-xs md:text-sm font-black tracking-[0.6em] uppercase">Curated Collections</span>
-                  <h3 className="text-3xl md:text-5xl font-serif font-black text-primary uppercase tracking-tighter">Browse Archives</h3>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
-                      {['Fine Art', 'Timepieces', 'Furniture', 'Jewelry', 'Manuscripts'].map((cat, index) => (
-                        <motion.div
-                          key={cat}
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          onClick={() => {
-                            setFilterType(cat);
-                            setView('marketplace');
-                          }}
-                          className="aspect-square bg-white border border-black/5 flex flex-col items-center justify-center p-4 md:p-6 cursor-pointer group hover:border-primary transition-all duration-500 shadow-sm hover:shadow-xl rounded-2xl md:rounded-3xl"
-                        >
-                          <h4 className="text-lg md:text-2xl font-black text-primary uppercase tracking-tighter mb-1 md:mb-2 group-hover:scale-110 transition-transform duration-500 text-center leading-none">{cat}</h4>
-                          <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-zinc-400">Elite Selection</span>
-                        </motion.div>
-                      ))}
-                </div>
-              </section>
-              
-              <section className="py-20 md:py-32 px-6 md:px-8 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-24">
-                {[
-                  { icon: (props: any) => (
-                    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="2" y1="12" x2="22" y2="12" />
-                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                    </svg>
-                  ), title: "Global Archives", desc: "Premium artifacts sourced from elite collectors and private estates worldwide." },
-                  { icon: (props: any) => (
-                    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-                      <line x1="7" y1="7" x2="7.01" y2="7" />
-                    </svg>
-                  ), title: "Secure Acquisition", desc: "We facilitate high-stakes transactions with complete security and confidentiality." },
-                  { icon: (props: any) => (
-                    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                      <path d="m9 12 2 2 4-4" />
-                    </svg>
-                  ), title: "Verified Provenance", desc: "Every artifact is rigorously authenticated to ensure historical accuracy and value." }
-                ].map((feature, index) => (
-                  <motion.div 
-                    key={feature.title}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="text-center space-y-6 md:space-y-8 group"
+              {/* Curatorial Departments Section */}
+              <section className="py-20 md:py-28 px-4 md:px-12 max-w-[1700px] mx-auto border-b border-stone-200">
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 pb-6 border-b border-stone-200 gap-4">
+                  <div className="space-y-2">
+                    <span className="text-amber-900 text-xs font-sans font-semibold tracking-[0.25em] uppercase">
+                      Curatorial Departments · 5 Disciplines
+                    </span>
+                    <h3 className="text-3xl md:text-4xl font-serif font-normal text-stone-900 tracking-tight">
+                      Archival Curations by Department
+                    </h3>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      setFilterType('all');
+                      setView('marketplace');
+                    }}
+                    className="text-xs font-sans uppercase tracking-[0.2em] text-stone-600 hover:text-stone-950 font-medium flex items-center gap-1.5 transition-colors self-start md:self-auto"
                   >
-                    <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/5 text-primary flex items-center justify-center rounded-full mx-auto group-hover:bg-primary group-hover:text-white transition-all duration-500">
-                      <feature.icon className="w-8 h-8 md:w-10 md:h-10" />
-                    </div>
-                    <div className="space-y-3 md:space-y-4">
-                      <h4 className="text-xl md:text-2xl font-black uppercase tracking-tight text-primary leading-none">{feature.title}</h4>
-                      <p className="text-zinc-500 text-sm md:text-base leading-relaxed max-w-xs mx-auto font-serif italic">{feature.desc}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </section>
+                    <span>View Full Catalogue</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
 
-              {/* Stats Section (Blue Bar) */}
-              <section className="bg-[#2563eb] py-24 px-8">
-                <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-12 md:gap-24 text-center">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
                   {[
-                    { label: "Listings", value: "500+" },
-                    { label: "Sellers", value: "200+" },
-                    { label: "Avg. Rating", value: "4.9" },
-                    { label: "Countries", value: "50+" }
-                  ].map((stat, index) => (
+                    { id: 'Fine Art', num: '01', desc: 'Old Masters, Impressionist & Contemporary' },
+                    { id: 'Timepieces', num: '02', desc: 'Complications & Haute Horlogerie' },
+                    { id: 'Furniture', num: '03', desc: 'Antiquities, Sculptures & Decorative Arts' },
+                    { id: 'Jewelry', num: '04', desc: 'Period Gemstones & Signed Creations' },
+                    { id: 'Manuscripts', num: '05', desc: 'Illuminated Texts & Historical Treatises' }
+                  ].map((dept, index) => (
                     <motion.div
-                      key={stat.label}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="text-white space-y-2"
+                      key={dept.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.08 }}
+                      onClick={() => {
+                        setFilterType(dept.id);
+                        setView('marketplace');
+                      }}
+                      className="bg-white border border-stone-200/90 p-5 md:p-6 cursor-pointer group hover:border-stone-800 hover:bg-[#faf7f2] transition-all duration-300 flex flex-col justify-between min-h-[160px] md:min-h-[190px]"
                     >
-                      <div className="flex justify-center mb-4">
-                        {index === 0 && <ShoppingBag className="w-8 h-8 opacity-50" />}
-                        {index === 1 && <UserIcon className="w-8 h-8 opacity-50" />}
-                        {index === 2 && <Star className="w-8 h-8 opacity-50" />}
-                        {index === 3 && <svg className="w-8 h-8 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>}
+                      <div className="flex justify-between items-start">
+                        <span className="text-xs font-serif italic text-stone-400 group-hover:text-amber-900 transition-colors">
+                          {dept.num}.
+                        </span>
+                        <ChevronRight className="w-3.5 h-3.5 text-stone-300 group-hover:text-stone-900 group-hover:translate-x-0.5 transition-all" />
                       </div>
-                      <h4 className="text-5xl font-black tracking-tighter">{stat.value}</h4>
-                      <p className="text-sm font-black uppercase tracking-[0.3em] opacity-70">{stat.label}</p>
+                      <div className="space-y-1.5">
+                        <h4 className="text-base md:text-lg font-serif font-medium text-stone-900 group-hover:text-amber-950 transition-colors leading-snug">
+                          {dept.id}
+                        </h4>
+                        <p className="text-[10px] font-sans text-stone-500 leading-relaxed font-normal">
+                          {dept.desc}
+                        </p>
+                      </div>
                     </motion.div>
                   ))}
                 </div>
               </section>
+              
+              {/* Three Curatorial Pillars */}
+              <section className="py-20 md:py-28 px-6 md:px-12 max-w-[1700px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 border-b border-stone-200">
+                {[
+                  {
+                    num: "I",
+                    title: "Historical Provenance",
+                    desc: "Every artifact cataloged by Strawboss undergoes forensic material analysis, scientific dating, and exhaustive archival chain-of-custody verification."
+                  },
+                  {
+                    num: "II",
+                    title: "Private Treaty & Discretion",
+                    desc: "Beyond public auctions, we broker confidential acquisitions between high-net-worth family offices, state institutions, and private collectors worldwide."
+                  },
+                  {
+                    num: "III",
+                    title: "White-Glove Custody",
+                    desc: "Climate-stabilized transit, museum-grade art packing, and insured dual-custody hand-delivery overseen by certified registrars across 54 countries."
+                  }
+                ].map((feature, index) => (
+                  <motion.div 
+                    key={feature.title}
+                    initial={{ opacity: 0, y: 25 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="space-y-4 group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs font-serif italic text-amber-900 font-semibold">{feature.num}.</span>
+                      <span className="h-[1px] w-8 bg-stone-300 group-hover:bg-amber-900 transition-colors" />
+                    </div>
+                    <h4 className="text-xl font-serif font-medium text-stone-900 tracking-tight leading-snug">{feature.title}</h4>
+                    <p className="text-stone-600 text-sm leading-relaxed font-serif italic">{feature.desc}</p>
+                  </motion.div>
+                ))}
+              </section>
 
-              {/* Newsletter Section */}
-              <section className="py-32 px-8 bg-white border-b border-black/5">
-                <div className="max-w-3xl mx-auto text-center space-y-12">
-                  <div className="w-16 h-16 bg-primary/5 text-primary flex items-center justify-center rounded-full mx-auto">
-                    <Send className="w-8 h-8" />
+              {/* Institutional Performance Ledger (Replaced generic Blue Bar) */}
+              <section className="bg-[#161412] text-[#fbf9f5] py-20 px-6 md:px-12 border-b border-stone-800">
+                <div className="max-w-[1700px] mx-auto">
+                  <div className="text-center mb-12">
+                    <span className="text-amber-400 text-xs font-sans uppercase tracking-[0.25em] font-semibold">
+                      Institutional Record & Global Standards
+                    </span>
                   </div>
-                  <div className="space-y-6">
-                    <h3 className="text-4xl font-black text-primary uppercase tracking-tighter">Stay in the Loop</h3>
-                    <p className="text-zinc-500 text-lg">Get the latest drops, exclusive deals, and style tips delivered to your inbox.</p>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
-                    <input 
-                      type="email" 
-                      placeholder="Enter your email address" 
-                      className="flex-grow px-8 py-5 bg-zinc-50 border border-black/5 rounded-none focus:outline-none focus:border-primary transition-colors"
-                    />
-                    <button className="btn-primary px-12 py-5 whitespace-nowrap">Subscribe</button>
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center divide-y lg:divide-y-0 lg:divide-x divide-stone-800">
+                    {[
+                      { label: "Authenticated Valuations", value: "$4.2B+" },
+                      { label: "Verified Private Estates", value: "340+" },
+                      { label: "Provenance Certification", value: "100%" },
+                      { label: "Courier Sovereign Reach", value: "54 Nations" }
+                    ].map((stat, index) => (
+                      <motion.div
+                        key={stat.label}
+                        initial={{ opacity: 0, y: 15 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.08 }}
+                        className={cn("space-y-2", index > 0 && "pt-6 lg:pt-0 lg:pl-8")}
+                      >
+                        <h4 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-normal tracking-tight text-[#fbf9f5] tabular-nums">
+                          {stat.value}
+                        </h4>
+                        <p className="text-xs font-sans uppercase tracking-[0.18em] text-stone-400 font-medium">
+                          {stat.label}
+                        </p>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
               </section>
 
-              <section className="py-40 px-8 max-w-7xl mx-auto">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-12 mb-24">
-                  <motion.div 
-                    initial={{ opacity: 0, x: -50 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    className="space-y-6"
-                  >
-                    <h3 className="text-3xl text-ink font-serif font-black uppercase tracking-tighter">GLOBAL <br/><span className="italic text-primary font-extralight text-5xl">ARCHIVES</span></h3>
-                    <p className="text-base text-ink/70 font-serif italic">Hand-picked treasures for the week of {format(new Date(), 'MMMM d')}</p>
-                  </motion.div>
-                  <motion.button 
-                    initial={{ opacity: 0, x: 50 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
+              {/* Archival Monograph Gazette Dispatch (Replaced generic newsletter) */}
+              <section className="py-24 px-6 md:px-12 bg-[#faf8f5] border-b border-stone-200">
+                <div className="max-w-2xl mx-auto text-center space-y-6">
+                  <div className="space-y-3">
+                    <span className="text-amber-900 text-xs font-sans uppercase tracking-[0.25em] font-semibold block">
+                      The Strawboss Monograph
+                    </span>
+                    <h3 className="text-3xl md:text-4xl font-serif font-normal text-stone-900 tracking-tight">
+                      Private Treaty Bulletins & Catalogues
+                    </h3>
+                    <p className="text-stone-600 font-serif italic text-base leading-relaxed">
+                      Receive advance auction catalogues, private view invitations, and scholarly provenance monographs directly to your correspondence desk.
+                    </p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3 pt-3">
+                    <input 
+                      type="email" 
+                      placeholder="curator@estate-archives.org" 
+                      className="flex-grow px-5 py-3.5 bg-white border border-stone-300 rounded-none text-xs font-sans placeholder:text-stone-400 focus:outline-none focus:border-stone-900 transition-colors"
+                    />
+                    <button className="btn-primary px-8 py-3.5 whitespace-nowrap text-xs font-sans tracking-[0.2em]">
+                      Request Dispatch
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              {/* Highlights Section Header */}
+              <section className="py-24 md:py-32 px-6 md:px-12 max-w-[1700px] mx-auto">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 pb-6 border-b border-stone-200">
+                  <div className="space-y-2">
+                    <span className="text-amber-900 text-xs font-sans uppercase tracking-[0.25em] font-semibold block">
+                      Curated Highlights · Spring Exhibition
+                    </span>
+                    <h3 className="text-3xl md:text-5xl font-serif font-normal text-stone-900 tracking-tight">
+                      Selected Masterpieces & Lots
+                    </h3>
+                  </div>
+                  <button 
                     onClick={() => setView('marketplace')}
-                    className="group flex items-center gap-4 text-primary hover:translate-x-4 transition-all duration-500 uppercase tracking-[0.4em] text-base font-black"
+                    className="text-xs font-sans uppercase tracking-[0.2em] text-stone-700 hover:text-stone-950 font-semibold flex items-center gap-2 group transition-colors"
                   >
-                    View All Archives <ChevronRight className="w-5 h-5 group-hover:text-ink transition-colors" />
-                  </motion.button>
+                    <span>View All Active Archives</span>
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 perspective-2000">
