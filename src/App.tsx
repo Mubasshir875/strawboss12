@@ -70,8 +70,12 @@ import {
   ChevronDown,
   ChevronUp,
   Share2,
-  Copy
+  Copy,
+  QrCode,
+  Smartphone,
+  Download
 } from 'lucide-react';
+import QRCode from 'qrcode';
 import { formatDistanceToNow, format } from 'date-fns';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -213,39 +217,132 @@ const getTimestampMillis = (timestamp: any): number => {
   return 0;
 };
 
-// Sample data for Demo Mode when quota is exceeded
+// Sample data for Demo & Offline Mode
 const SAMPLE_ITEMS: AuctionItem[] = [
   {
-    id: 'sample-1',
-    title: 'Imperial Jade Dragon Seal',
-    description: 'A magnificent jade seal from the Qianlong period, featuring intricate dragon carvings and imperial inscriptions.',
-    category: 'Fine Art',
-    price: 1250000,
-    currentBid: 1450000,
-    bidCount: 12,
-    images: ['https://picsum.photos/seed/jade/800/1000'],
-    status: 'active',
-    listingType: 'auction',
-    endTime: Timestamp.fromDate(new Date(Date.now() + 86400000)),
-    createdAt: Timestamp.now(),
-    sellerUid: 'system',
-    sellerName: 'Strawboss Archives'
-  },
-  {
-    id: 'sample-2',
-    title: 'Renaissance Astrolabe',
-    description: 'An exceptionally rare brass astrolabe, dated 1542, used for celestial navigation and timekeeping.',
-    category: 'Other',
-    price: 450000,
-    currentBid: 450000,
-    bidCount: 0,
-    images: ['https://picsum.photos/seed/astrolabe/800/1000'],
+    id: 'lot-801',
+    title: '18th Century French Rococo Armchair',
+    description: 'An exquisite example of 18th-century Parisian craftsmanship, featuring hand-carved walnut detailing, gilded acanthus motifs, and original silk damask upholstery.',
+    category: 'Furniture',
+    price: 18500,
+    currentBid: 19800,
+    bidCount: 9,
+    images: ['https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=1000'],
     status: 'active',
     listingType: 'auction',
     endTime: Timestamp.fromDate(new Date(Date.now() + 172800000)),
     createdAt: Timestamp.now(),
     sellerUid: 'system',
     sellerName: 'Strawboss Archives'
+  },
+  {
+    id: 'lot-802',
+    title: 'Patek Philippe Perpetual Calendar 1952',
+    description: 'A legendary reference in haute horlogerie. 18k yellow gold case, perpetual calendar complication, moon phase aperture, and documented Geneva archival extract.',
+    category: 'Timepieces',
+    price: 145000,
+    currentBid: 162000,
+    bidCount: 14,
+    images: ['https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&q=80&w=1000'],
+    status: 'active',
+    listingType: 'auction',
+    endTime: Timestamp.fromDate(new Date(Date.now() + 259200000)),
+    createdAt: Timestamp.now(),
+    sellerUid: 'system',
+    sellerName: 'Geneva Horology Desk'
+  },
+  {
+    id: 'lot-803',
+    title: 'Imperial Ming Dynasty Celadon Vase',
+    description: 'Xuande period (1426–1435) imperial porcelain featuring seafoam celadon crackle glaze, carved lotus scroll body, and underglaze blue six-character reign mark.',
+    category: 'Fine Art',
+    price: 320000,
+    currentBid: 345000,
+    bidCount: 18,
+    images: ['https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?auto=format&fit=crop&q=80&w=1000'],
+    status: 'active',
+    listingType: 'auction',
+    endTime: Timestamp.fromDate(new Date(Date.now() + 86400000)),
+    createdAt: Timestamp.now(),
+    sellerUid: 'system',
+    sellerName: 'Asian Art Consortium'
+  },
+  {
+    id: 'lot-804',
+    title: 'Victorian Emerald & Old-Cut Diamond Tiara',
+    description: 'Circa 1885 royal court parure mounted in platinum and 18k yellow gold, featuring 32 carats of untreated Colombian emeralds and brilliant European-cut diamonds.',
+    category: 'Jewelry',
+    price: 88000,
+    currentBid: 88000,
+    bidCount: 0,
+    images: ['https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&q=80&w=1000'],
+    status: 'active',
+    listingType: 'buy-now',
+    createdAt: Timestamp.now(),
+    sellerUid: 'system',
+    sellerName: 'Mayfair Estate Jewels'
+  },
+  {
+    id: 'lot-805',
+    title: 'Gutenberg Bible Illuminated Vellum Leaf',
+    description: 'An original 1455 folio fragment printed in Mainz by Johannes Gutenberg. 42-line Gothic typesetting with rubricated red and cobalt initial capitals.',
+    category: 'Manuscripts',
+    price: 240000,
+    currentBid: 265000,
+    bidCount: 22,
+    images: ['https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=1000'],
+    status: 'active',
+    listingType: 'auction',
+    endTime: Timestamp.fromDate(new Date(Date.now() + 345600000)),
+    createdAt: Timestamp.now(),
+    sellerUid: 'system',
+    sellerName: 'Bodleian Curatorial Desk'
+  },
+  {
+    id: 'lot-806',
+    title: 'Cartier Art Deco Onyx & Platinum Desk Clock',
+    description: '1927 Paris creation with mystery floating hands, carved nephrite jade base, cabochon coral finials, and an 8-day European Watch & Clock Co. movement.',
+    category: 'Timepieces',
+    price: 76000,
+    currentBid: 76000,
+    bidCount: 0,
+    images: ['https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=1000'],
+    status: 'active',
+    listingType: 'buy-now',
+    createdAt: Timestamp.now(),
+    sellerUid: 'system',
+    sellerName: 'Place Vendôme Heritage'
+  },
+  {
+    id: 'lot-807',
+    title: 'Florentine Renaissance Walnut Cassone',
+    description: 'Late 15th-century carved marriage chest attributed to the workshop of Giuliano da Maiano, depicting allegorical triumphal processions in deep relief.',
+    category: 'Furniture',
+    price: 64000,
+    currentBid: 68500,
+    bidCount: 7,
+    images: ['https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&q=80&w=1000'],
+    status: 'active',
+    listingType: 'auction',
+    endTime: Timestamp.fromDate(new Date(Date.now() + 432000000)),
+    createdAt: Timestamp.now(),
+    sellerUid: 'system',
+    sellerName: 'Tuscan Heritage Trust'
+  },
+  {
+    id: 'lot-808',
+    title: 'Cartier Burma Ruby & Diamond Cluster Ring',
+    description: 'A certified 5.42ct unheated Pigeon Blood Burma ruby bordered by calibrated tapered baguette diamonds in an architectural platinum setting.',
+    category: 'Jewelry',
+    price: 128000,
+    currentBid: 128000,
+    bidCount: 0,
+    images: ['https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&q=80&w=1000'],
+    status: 'active',
+    listingType: 'buy-now',
+    createdAt: Timestamp.now(),
+    sellerUid: 'system',
+    sellerName: 'Geneva Private Salon'
   }
 ];
 
@@ -767,7 +864,7 @@ const Navbar = ({
         </div>
 
         {/* Zone 2: Curated Nav Links */}
-        <div className="hidden lg:flex items-center gap-7 text-[11px] font-sans uppercase tracking-[0.18em] text-stone-600">
+        <div className="hidden lg:flex items-center gap-6 text-[11px] font-sans uppercase tracking-[0.16em] text-stone-600">
           {[
             { name: 'Live Auctions', view: 'marketplace' },
             { name: 'Private Treaty', view: 'marketplace' },
@@ -788,33 +885,71 @@ const Navbar = ({
           ))}
         </div>
 
-        {/* Search Input - Desktop */}
-        <div className="hidden xl:flex items-center flex-1 max-w-sm mx-4">
-          <div className="relative w-full">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
-            <input 
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Search catalog, era, medium..."
-              className="w-full bg-white/70 border border-stone-300/80 rounded-none py-2 pl-9 pr-3 text-xs font-sans placeholder:text-stone-400 outline-none focus:bg-white focus:border-stone-800 transition-all"
-            />
-          </div>
+        {/* Center: Amazon-grade Prominent Omni-Search Engine */}
+        <div className="flex-1 max-w-xl mx-2 md:mx-4">
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              setSearchQuery(inputValue);
+              if (view !== 'marketplace') setView('marketplace');
+            }}
+            className="flex items-center w-full bg-white border-2 border-stone-300 focus-within:border-stone-900 shadow-sm transition-all rounded-none overflow-hidden"
+          >
+            {/* Category Quick Filter Scope */}
+            <div className="hidden sm:flex items-center px-3 border-r border-stone-200 bg-[#f7f5f1] text-[11px] font-sans font-medium text-stone-700">
+              <span>All Archives</span>
+            </div>
+
+            <div className="relative flex-1 flex items-center">
+              <Search className="absolute left-3 w-4 h-4 text-stone-400 pointer-events-none" />
+              <input 
+                type="text"
+                value={inputValue}
+                onChange={(e) => {
+                  setInputValue(e.target.value);
+                  if (view !== 'marketplace' && e.target.value.trim().length > 1) {
+                    setView('marketplace');
+                  }
+                }}
+                placeholder="Search by title, lot number, century, artist, material..."
+                className="w-full bg-transparent py-2.5 pl-9 pr-8 text-xs font-sans placeholder:text-stone-400 outline-none text-stone-900"
+              />
+              {inputValue && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInputValue('');
+                    setSearchQuery('');
+                  }}
+                  className="absolute right-2.5 p-1 text-stone-400 hover:text-stone-700 transition-colors"
+                  title="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            <button 
+              type="submit"
+              className="bg-stone-900 text-stone-50 hover:bg-stone-800 px-4 md:px-5 py-2.5 text-xs font-sans font-medium flex items-center justify-center transition-colors"
+              title="Search Archives"
+            >
+              <Search className="w-4 h-4 md:hidden" />
+              <span className="hidden md:inline uppercase tracking-widest text-[10px] font-bold">Search</span>
+            </button>
+          </form>
         </div>
 
         {/* Zone 3: Actions */}
-        <div className="flex items-center gap-3 md:gap-5 flex-shrink-0">
-          {/* Mobile search toggle / simple input */}
-          <div className="xl:hidden w-32 sm:w-48 relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-stone-400 pointer-events-none" />
-            <input 
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Search..."
-              className="w-full bg-white/80 border border-stone-300 rounded-none py-1.5 pl-7 pr-2 text-[11px] font-sans outline-none focus:border-stone-800"
-            />
-          </div>
+        <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+          <button 
+            onClick={() => setView('marketplace')}
+            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-sans uppercase tracking-wider text-stone-700 hover:text-stone-950 border border-stone-200 bg-white/60 transition-colors"
+            title="Browse all products"
+          >
+            <LayoutGrid className="w-3.5 h-3.5 text-amber-900" />
+            <span>Catalogue</span>
+          </button>
 
           <button 
             onClick={() => setView('dashboard')}
@@ -864,6 +999,48 @@ const Navbar = ({
           </button>
         </div>
       </nav>
+
+      {/* Department Quick Navigation Ribbon (Effortless 1-click product discovery) */}
+      <div className="hidden sm:flex items-center justify-between px-4 md:px-12 py-2 bg-[#f4f1ea] border-t border-stone-200 text-[11px] font-sans">
+        <div className="flex items-center gap-1 sm:gap-6 overflow-x-auto no-scrollbar py-0.5">
+          <button
+            onClick={() => {
+              setSearchQuery('');
+              setView('marketplace');
+            }}
+            className="font-semibold text-stone-900 hover:text-amber-900 uppercase tracking-wider whitespace-nowrap flex items-center gap-1.5"
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span>All Lots</span>
+          </button>
+          <span className="text-stone-300">|</span>
+          {[
+            { label: 'Fine Art & Paintings', query: 'Fine Art' },
+            { label: 'Rare Timepieces', query: 'Timepieces' },
+            { label: 'Antique Furniture', query: 'Furniture' },
+            { label: 'High Jewelry', query: 'Jewelry' },
+            { label: 'Historical Manuscripts', query: 'Manuscripts' },
+            { label: 'Live Bidding Now', query: 'Trending' }
+          ].map((cat) => (
+            <button
+              key={cat.label}
+              onClick={() => {
+                setSearchQuery(cat.query === 'Trending' ? '' : cat.query);
+                setView('marketplace');
+              }}
+              className="text-stone-600 hover:text-stone-950 uppercase tracking-wider whitespace-nowrap hover:underline underline-offset-4 transition-all"
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="hidden lg:flex items-center gap-3 text-stone-500 text-[10px] uppercase tracking-widest font-medium">
+          <span>Global Delivery Protection</span>
+          <span>·</span>
+          <span>Authenticity Verified</span>
+        </div>
+      </div>
 
       <AnimatePresence>
         {isMobileMenuOpen && (
@@ -1471,23 +1648,41 @@ const Archives = ({
   printSelectedIds,
   setPrintSelectedIds
 }: any) => {
+  const [formatFilter, setFormatFilter] = useState<'all' | 'auction' | 'buy-now'>('all');
+  const [priceFilter, setPriceFilter] = useState<'all' | 'under10k' | '10k-50k' | '50k+'>('all');
+
   const filteredItems = useMemo(() => {
     let result = items;
     if (filterType !== 'all') {
       if (filterType === 'Trending') {
-        result = items.filter((i: AuctionItem) => i.bidCount > 5);
+        result = items.filter((i: AuctionItem) => (i.bidCount || 0) > 2);
       } else {
         result = items.filter((i: AuctionItem) => i.category === filterType);
       }
     }
+    if (formatFilter !== 'all') {
+      result = result.filter((i: AuctionItem) => i.listingType === formatFilter);
+    }
+    if (priceFilter !== 'all') {
+      result = result.filter((i: AuctionItem) => {
+        const val = i.price || i.currentBid || 0;
+        if (priceFilter === 'under10k') return val < 10000;
+        if (priceFilter === '10k-50k') return val >= 10000 && val <= 50000;
+        if (priceFilter === '50k+') return val > 50000;
+        return true;
+      });
+    }
     if (searchQuery) {
+      const q = searchQuery.toLowerCase().trim();
       result = result.filter((i: AuctionItem) => 
-        i.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        i.description.toLowerCase().includes(searchQuery.toLowerCase())
+        (i.title && i.title.toLowerCase().includes(q)) || 
+        (i.description && i.description.toLowerCase().includes(q)) ||
+        (i.category && i.category.toLowerCase().includes(q)) ||
+        (i.sellerName && i.sellerName.toLowerCase().includes(q))
       );
     }
     return result;
-  }, [items, filterType, searchQuery]);
+  }, [items, filterType, formatFilter, priceFilter, searchQuery]);
 
   const sortedItems = useMemo(() => {
     const list = [...filteredItems];
@@ -1501,13 +1696,22 @@ const Archives = ({
     return list;
   }, [filteredItems, sortBy]);
 
+  const isAnyFilterActive = filterType !== 'all' || formatFilter !== 'all' || priceFilter !== 'all' || !!searchQuery;
+
+  const handleResetFilters = () => {
+    setFilterType('all');
+    setFormatFilter('all');
+    setPriceFilter('all');
+    setSearchQuery('');
+  };
+
   return (
     <section className="relative min-h-screen pt-24 md:pt-36 pb-24 md:pb-40 bg-[#faf8f5]">
-      <div className="max-w-[1700px] mx-auto px-4 sm:px-6 md:px-12 space-y-10 md:space-y-16">
+      <div className="max-w-[1700px] mx-auto px-4 sm:px-6 md:px-12 space-y-8 md:space-y-12">
         
         {/* Gallery Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-stone-200">
-          <div className="space-y-2">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-stone-200">
+          <div className="space-y-2 max-w-2xl">
             <div className="flex items-center gap-3">
               <span className="w-8 h-[1px] bg-amber-800" />
               <span className="text-[10px] md:text-xs font-sans font-semibold uppercase tracking-[0.25em] text-amber-900">
@@ -1517,59 +1721,115 @@ const Archives = ({
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-normal text-stone-900 tracking-tight leading-tight">
               Curated Masterpiece Register
             </h1>
-            <p className="text-sm font-serif italic text-stone-600 max-w-xl">
-              Authentic provenance guaranteed on all catalogued lots. Scientific condition certificates available upon consignor request.
+            <p className="text-sm font-serif italic text-stone-600">
+              Browse authentic historical artifacts, fine art, and rare timepieces. Fast discovery, verified provenance, and museum-grade condition reports.
             </p>
           </div>
           
-          <div className="flex flex-col gap-4 md:items-end">
-            {/* Filter Navigation Tabs */}
-            <div className="flex items-center gap-1 sm:gap-2 bg-white border border-stone-300/80 p-1 overflow-x-auto no-scrollbar max-w-full">
-              {['all', 'Trending', 'Fine Art', 'Timepieces', 'Furniture', 'Jewelry'].map((cat) => (
+          <div className="flex flex-col gap-3 lg:items-end w-full lg:w-auto">
+            {/* Category Tabs */}
+            <div className="flex items-center gap-1 bg-white border border-stone-300/80 p-1 overflow-x-auto no-scrollbar max-w-full">
+              {[
+                { id: 'all', label: 'All Lots' },
+                { id: 'Trending', label: 'Live & Trending' },
+                { id: 'Fine Art', label: 'Fine Art' },
+                { id: 'Timepieces', label: 'Timepieces' },
+                { id: 'Furniture', label: 'Furniture' },
+                { id: 'Jewelry', label: 'Jewelry' },
+                { id: 'Manuscripts', label: 'Manuscripts' }
+              ].map((cat) => (
                 <button
-                  key={cat}
-                  onClick={() => setFilterType(cat)}
+                  key={cat.id}
+                  onClick={() => setFilterType(cat.id)}
                   className={cn(
-                    "px-3.5 py-1.5 text-[10px] sm:text-[11px] font-sans font-medium uppercase tracking-[0.16em] transition-colors whitespace-nowrap",
-                    filterType === cat 
+                    "px-3 py-1.5 text-[10px] sm:text-[11px] font-sans font-medium uppercase tracking-[0.16em] transition-colors whitespace-nowrap",
+                    filterType === cat.id 
                       ? "bg-stone-900 text-stone-50" 
-                      : "text-stone-600 hover:text-stone-950"
+                      : "text-stone-600 hover:text-stone-950 hover:bg-stone-100/60"
                   )}
                 >
-                  {cat === 'all' ? 'All Lots' : cat}
+                  {cat.label}
                 </button>
               ))}
             </div>
 
-            {/* Sort & Utility Row */}
-            <div className="flex items-center gap-3">
+            {/* Sub-Filters: Acquisition Format, Price Bracket & Sort Controls */}
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Acquisition Format Toggle */}
+              <div className="flex items-center bg-white border border-stone-300/80 p-0.5 text-[10px] sm:text-xs font-sans uppercase tracking-[0.12em]">
+                <button
+                  onClick={() => setFormatFilter('all')}
+                  className={cn(
+                    "px-2.5 py-1 transition-colors",
+                    formatFilter === 'all' ? "bg-stone-900 text-white font-medium" : "text-stone-600 hover:text-stone-900"
+                  )}
+                >
+                  All Formats
+                </button>
+                <button
+                  onClick={() => setFormatFilter('auction')}
+                  className={cn(
+                    "px-2.5 py-1 transition-colors",
+                    formatFilter === 'auction' ? "bg-stone-900 text-white font-medium" : "text-stone-600 hover:text-stone-900"
+                  )}
+                >
+                  Live Auction
+                </button>
+                <button
+                  onClick={() => setFormatFilter('buy-now')}
+                  className={cn(
+                    "px-2.5 py-1 transition-colors",
+                    formatFilter === 'buy-now' ? "bg-stone-900 text-white font-medium" : "text-stone-600 hover:text-stone-900"
+                  )}
+                >
+                  Buy Now
+                </button>
+              </div>
+
+              {/* Price Filter Selector */}
+              <div className="relative">
+                <select 
+                  value={priceFilter}
+                  onChange={(e) => setPriceFilter(e.target.value as any)}
+                  className="bg-white border border-stone-300/80 px-3 py-1.5 text-[10px] sm:text-xs font-sans font-medium uppercase tracking-[0.14em] appearance-none cursor-pointer pr-8 focus:border-stone-900 outline-none text-stone-800 transition-colors"
+                >
+                  <option value="all">Valuation: Any Price</option>
+                  <option value="under10k">Under $10,000</option>
+                  <option value="10k-50k">$10,000 – $50,000</option>
+                  <option value="50k+">$50,000 & Above</option>
+                </select>
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
+              </div>
+
+              {/* Sort Selector */}
               <div className="relative">
                 <select 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="bg-white border border-stone-300/80 px-4 py-2 text-[10px] sm:text-xs font-sans font-medium uppercase tracking-[0.15em] appearance-none cursor-pointer pr-9 focus:border-stone-900 outline-none text-stone-800 transition-colors"
+                  className="bg-white border border-stone-300/80 px-3 py-1.5 text-[10px] sm:text-xs font-sans font-medium uppercase tracking-[0.14em] appearance-none cursor-pointer pr-8 focus:border-stone-900 outline-none text-stone-800 transition-colors"
                 >
-                  <option value="newest">Sort: Newest Lots</option>
-                  <option value="price-low">Valuation: Low to High</option>
-                  <option value="price-high">Valuation: High to Low</option>
+                  <option value="newest">Sort: Newest</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
                 </select>
-                <ChevronRight className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rotate-90 text-stone-400 pointer-events-none" />
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
               </div>
 
+              {/* Print Dossier */}
               <button 
                 onClick={() => {
-                  const curatedItems = items.filter(item => printSelectedIds?.includes(item.id));
+                  const curatedItems = items.filter((item: AuctionItem) => printSelectedIds?.includes(item.id));
                   if (!curatedItems || curatedItems.length === 0) {
                     alert('Please select archives for your curated catalog by clicking the [Printer] button on any item card.');
                     return;
                   }
                   window.print();
                 }}
-                className="px-4 py-2 bg-white border border-stone-300 text-stone-800 text-[10px] sm:text-xs font-sans font-medium tracking-[0.15em] uppercase flex items-center gap-2 hover:bg-stone-900 hover:text-white transition-colors no-print"
+                className="px-3 py-1.5 bg-white border border-stone-300 text-stone-800 text-[10px] sm:text-xs font-sans font-medium tracking-[0.12em] uppercase flex items-center gap-1.5 hover:bg-stone-900 hover:text-white transition-colors no-print"
                 title="Print Curated Dossier"
               >
                 <Printer className="w-3.5 h-3.5" />
-                <span>Print Dossier ({printSelectedIds?.length || 0})</span>
+                <span>Dossier ({printSelectedIds?.length || 0})</span>
               </button>
 
               <button 
@@ -1584,10 +1844,102 @@ const Archives = ({
           </div>
         </div>
 
+        {/* Active Discovery Feedback Bar & Filter Badges */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2 px-4 bg-white/70 border border-stone-200 text-xs font-sans">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-stone-500 font-medium">
+              Showing <span className="text-stone-950 font-bold">{sortedItems.length}</span> {sortedItems.length === 1 ? 'acquisition' : 'acquisitions'}
+            </span>
+
+            {isAnyFilterActive && (
+              <span className="text-stone-300 mx-1">|</span>
+            )}
+
+            {/* Active search badge */}
+            {searchQuery && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-950 border border-amber-200/80 text-[11px] font-medium">
+                Keyword: "{searchQuery}"
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  className="hover:text-amber-700 ml-1"
+                  title="Remove keyword filter"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+
+            {/* Active Category badge */}
+            {filterType !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-stone-100 text-stone-900 border border-stone-300 text-[11px] font-medium">
+                Category: {filterType}
+                <button 
+                  onClick={() => setFilterType('all')}
+                  className="hover:text-red-700 ml-1"
+                  title="Clear category filter"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+
+            {/* Active Format badge */}
+            {formatFilter !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-stone-100 text-stone-900 border border-stone-300 text-[11px] font-medium">
+                {formatFilter === 'auction' ? 'Live Auctions Only' : 'Buy Now Only'}
+                <button 
+                  onClick={() => setFormatFilter('all')}
+                  className="hover:text-red-700 ml-1"
+                  title="Clear format filter"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+
+            {/* Active Price badge */}
+            {priceFilter !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-stone-100 text-stone-900 border border-stone-300 text-[11px] font-medium">
+                Price: {priceFilter === 'under10k' ? '< $10,000' : priceFilter === '10k-50k' ? '$10,000 – $50,000' : '$50,000+'}
+                <button 
+                  onClick={() => setPriceFilter('all')}
+                  className="hover:text-red-700 ml-1"
+                  title="Clear price filter"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            )}
+
+            {isAnyFilterActive && (
+              <button
+                onClick={handleResetFilters}
+                className="text-stone-500 hover:text-stone-950 underline underline-offset-2 text-[11px] font-semibold uppercase tracking-wider ml-1"
+              >
+                Clear all filters
+              </button>
+            )}
+          </div>
+
+          {/* Quick Search Inspiration Suggestions */}
+          <div className="flex items-center gap-1.5 text-[11px] text-stone-500 overflow-x-auto no-scrollbar">
+            <span className="font-semibold uppercase tracking-wider text-[10px] text-stone-400 whitespace-nowrap">Popular:</span>
+            {['Patek Philippe', 'French Rococo', 'Cartier', 'Ming Dynasty', 'Oil on Canvas'].map(term => (
+              <button
+                key={term}
+                onClick={() => setSearchQuery(term)}
+                className="hover:text-amber-900 hover:underline underline-offset-2 whitespace-nowrap px-1.5 py-0.5 bg-stone-100/80 hover:bg-amber-50 text-stone-700 transition-colors"
+              >
+                {term}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Gallery Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-3 md:gap-x-8 gap-y-6 md:gap-y-16">
           {/* Print View (Hidden on Screen) */}
-          <CatalogPrintView items={items.filter(item => printSelectedIds?.includes(item.id))} />
+          <CatalogPrintView items={items.filter((item: AuctionItem) => printSelectedIds?.includes(item.id))} />
 
           <AnimatePresence mode="popLayout">
             {loading ? (
@@ -1603,9 +1955,9 @@ const Archives = ({
                   isSelectedForPrint={printSelectedIds?.includes(item.id)}
                   onTogglePrint={(e) => {
                     e.stopPropagation();
-                    setPrintSelectedIds(prev => 
+                    setPrintSelectedIds((prev: string[]) => 
                       prev.includes(item.id) 
-                        ? prev.filter(id => id !== item.id) 
+                        ? prev.filter((id: string) => id !== item.id) 
                         : [...prev, item.id]
                     );
                   }}
@@ -1613,19 +1965,55 @@ const Archives = ({
               ))
             ) : (
               <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="col-span-full py-40 md:py-60 text-center space-y-8 md:space-y-12"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="col-span-full py-24 md:py-32 text-center bg-white border border-stone-200/80 p-8 space-y-6"
               >
-                <div className="w-24 h-24 md:w-32 md:h-32 bg-black/[0.02] border border-black/[0.05] flex items-center justify-center mx-auto rounded-full">
-                  <Search className="w-8 h-8 md:w-10 md:h-10 text-black/10" />
+                <div className="w-16 h-16 bg-stone-100 border border-stone-200 flex items-center justify-center mx-auto rounded-full">
+                  <Search className="w-6 h-6 text-stone-400" />
                 </div>
-                <div className="space-y-4">
-                  <h3 className="text-2xl md:text-4xl font-serif font-medium text-black italic">No acquisitions found</h3>
-                  <p className="text-xs md:text-sm text-black/40 max-w-sm mx-auto font-medium tracking-wide">The archive filters have returned no matches. Try refining your curation.</p>
+                <div className="space-y-2 max-w-md mx-auto">
+                  <h3 className="text-2xl font-serif text-stone-900">No matching acquisitions found</h3>
+                  <p className="text-sm font-serif italic text-stone-600">
+                    {searchQuery 
+                      ? `We couldn't find any lots matching "${searchQuery}". Try broadening your search or reset your category and valuation filters.`
+                      : 'No items match your selected filter criteria. Try resetting your filters to explore our full archives.'}
+                  </p>
                 </div>
-                <div className="flex justify-center gap-4">
-                  <button onClick={onRefresh} className="btn-primary px-8 md:px-12">Refresh</button>
+                <div className="flex flex-wrap justify-center gap-3 pt-2">
+                  <button 
+                    onClick={handleResetFilters} 
+                    className="btn-primary !py-2.5 !px-6 !text-xs"
+                  >
+                    Reset All Filters
+                  </button>
+                  <button 
+                    onClick={() => {
+                      handleResetFilters();
+                      setFilterType('Fine Art');
+                    }}
+                    className="px-4 py-2.5 border border-stone-300 text-stone-800 text-xs font-sans uppercase tracking-wider hover:border-stone-900 transition-colors"
+                  >
+                    Browse Fine Art
+                  </button>
+                  <button 
+                    onClick={() => {
+                      handleResetFilters();
+                      setFilterType('Timepieces');
+                    }}
+                    className="px-4 py-2.5 border border-stone-300 text-stone-800 text-xs font-sans uppercase tracking-wider hover:border-stone-900 transition-colors"
+                  >
+                    Browse Timepieces
+                  </button>
+                  <button 
+                    onClick={() => {
+                      handleResetFilters();
+                      setFilterType('Furniture');
+                    }}
+                    className="px-4 py-2.5 border border-stone-300 text-stone-800 text-xs font-sans uppercase tracking-wider hover:border-stone-900 transition-colors"
+                  >
+                    Browse Furniture
+                  </button>
                 </div>
               </motion.div>
             )}
@@ -2638,47 +3026,137 @@ const ItemDetail = ({
   const [showHammer, setShowHammer] = useState(false);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string>('');
+  const [qrLoading, setQrLoading] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedSocialNotice, setCopiedSocialNotice] = useState<string | null>(null);
 
-  const handleShare = async () => {
-    const shareUrl = window.location.href;
-    const shareTitle = `Strawboss Archives: ${item.title}`;
-    const shareText = `Discover this rare piece on Strawboss Archives: ${item.title}`;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: shareUrl
-        });
-        return;
-      } catch (err) {
-        // Fallback to custom modal
-      }
+  const getDirectLink = () => {
+    try {
+      const url = new URL(window.location.origin + window.location.pathname);
+      url.searchParams.set('lot', item.id);
+      return url.toString();
+    } catch {
+      return window.location.href;
     }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+    const generateLotQr = async () => {
+      setQrLoading(true);
+      try {
+        const directUrl = getDirectLink();
+        const url = await QRCode.toDataURL(directUrl, {
+          width: 360,
+          margin: 2,
+          color: {
+            dark: '#1c1917', // stone-900
+            light: '#faf8f5', // warm archival background
+          },
+          errorCorrectionLevel: 'H',
+        });
+        if (isMounted) {
+          setQrDataUrl(url);
+          setQrLoading(false);
+        }
+      } catch (err) {
+        console.error('Failed to generate lot QR code', err);
+        if (isMounted) setQrLoading(false);
+      }
+    };
+    generateLotQr();
+    return () => { isMounted = false; };
+  }, [item.id]);
+
+  const handleDownloadQr = () => {
+    if (!qrDataUrl) return;
+    const link = document.createElement('a');
+    link.href = qrDataUrl;
+    link.download = `Strawboss-Lot-${item.id.slice(0, 8)}-QRCode.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleShare = () => {
     setShowShareModal(true);
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
+    const directUrl = getDirectLink();
+    navigator.clipboard.writeText(directUrl);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2500);
   };
 
+  const handleShareNative = async () => {
+    const directUrl = getDirectLink();
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Strawboss Archives: ${item.title}`,
+          text: `Explore this verified archival lot: ${item.title} ($${(item.currentBid || item.price || 0).toLocaleString()} USD)`,
+          url: directUrl
+        });
+      } catch (err) {
+        // Ignored if cancelled
+      }
+    } else {
+      handleCopyLink();
+    }
+  };
+
+  const handleShareTwitter = () => {
+    const directUrl = getDirectLink();
+    const text = `Explore this verified archival acquisition on Strawboss Archives: "${item.title}" (${item.category}, $${(item.currentBid || item.price || 0).toLocaleString()} USD)`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(directUrl)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleShareFacebook = () => {
+    const directUrl = getDirectLink();
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(directUrl)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleShareWhatsApp = () => {
+    const directUrl = getDirectLink();
+    const text = `Explore this rare piece on Strawboss Archives: "${item.title}" ($${(item.currentBid || item.price || 0).toLocaleString()} USD) - ${directUrl}`;
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleSharePinterest = () => {
+    const directUrl = getDirectLink();
+    const media = (item.images && item.images[0]) || '';
+    const desc = `${item.title} - Strawboss Fine Antiquities & Masterpiece Archives`;
+    const url = `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(directUrl)}&media=${encodeURIComponent(media)}&description=${encodeURIComponent(desc)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleShareLinkedIn = () => {
+    const directUrl = getDirectLink();
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(directUrl)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   const handleShareInstagram = () => {
-    const caption = `Rare piece from Strawboss Archives: ${item.title} ($${(item.currentBid || item.price || 0).toLocaleString()})\n\nExplore at: ${window.location.href} #vintage #antiques #rarecollection #strawboss`;
+    const directUrl = getDirectLink();
+    const caption = `Rare piece from Strawboss Archives: ${item.title} ($${(item.currentBid || item.price || 0).toLocaleString()} USD)\n\nExplore provenance & condition certificate at: ${directUrl}\n\n#strawboss #antiques #rarecollection #fineart #curated #auction #historical`;
     navigator.clipboard.writeText(caption);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2500);
+    setCopiedSocialNotice('Instagram post caption copied to clipboard!');
+    setTimeout(() => setCopiedSocialNotice(null), 3000);
     window.open('https://www.instagram.com', '_blank');
   };
 
   const handleShareTikTok = () => {
-    const caption = `Look at this incredible archival find on Strawboss: ${item.title} ✨ #rare #collector #history #antiques #auction`;
+    const directUrl = getDirectLink();
+    const caption = `Look at this incredible archival find on Strawboss: ${item.title} ✨ #rare #collector #history #antiques #auction #fineart ${directUrl}`;
     navigator.clipboard.writeText(caption);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2500);
+    setCopiedSocialNotice('TikTok video hook copied to clipboard!');
+    setTimeout(() => setCopiedSocialNotice(null), 3000);
     window.open('https://www.tiktok.com', '_blank');
   };
 
@@ -2851,86 +3329,335 @@ const ItemDetail = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[130] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-[130] bg-black/75 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
             onClick={() => setShowShareModal(false)}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              initial={{ scale: 0.95, opacity: 0, y: 15 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              exit={{ scale: 0.95, opacity: 0, y: 15 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-paper border border-black/10 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative space-y-6"
+              className="bg-white border border-stone-300 max-w-lg w-full shadow-2xl relative p-6 sm:p-8 space-y-6 text-stone-900"
             >
-              <button
-                onClick={() => setShowShareModal(false)}
-                className="absolute top-5 right-5 w-8 h-8 rounded-full bg-black/5 hover:bg-black/10 flex items-center justify-center text-ink/60 transition-all cursor-pointer"
-                aria-label="Close"
-              >
-                <X className="w-4 h-4" />
-              </button>
-
-              <div className="space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">Curated Discovery</span>
-                <h3 className="text-xl font-serif font-black text-primary uppercase">Share This Acquisition</h3>
-                <p className="text-xs text-ink/70">Share this authenticated archival piece with your network or followers.</p>
+              {/* Header */}
+              <div className="flex items-start justify-between border-b border-stone-200 pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-700" />
+                    <span className="text-[10px] font-sans font-semibold uppercase tracking-[0.25em] text-amber-900">
+                      Provenance Share
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-serif text-stone-900">
+                    Share This Acquisition
+                  </h3>
+                  <p className="text-xs font-serif italic text-stone-600">
+                    Distribute direct archival permalink or broadcast to integrated social platforms.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowShareModal(false)}
+                  className="p-1.5 hover:bg-stone-100 text-stone-500 hover:text-stone-950 transition-colors"
+                  aria-label="Close share dialog"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
-              <div className="space-y-3">
-                {/* Instagram Option */}
-                <button
-                  onClick={handleShareInstagram}
-                  className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-[#f09433]/10 via-[#e6683c]/10 to-[#bc1888]/10 hover:from-[#f09433]/20 hover:via-[#e6683c]/20 hover:to-[#bc1888]/20 border border-[#e6683c]/20 transition-all group cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] flex items-center justify-center text-white shadow-md">
-                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              {/* Lot Mini Snapshot */}
+              <div className="flex items-center gap-4 p-3 bg-[#faf8f5] border border-stone-200">
+                <div className="w-14 h-14 flex-shrink-0 bg-stone-100 border border-stone-200 overflow-hidden flex items-center justify-center">
+                  <img 
+                    src={(item.images && item.images[0]) || `https://picsum.photos/seed/${item.id}/200/200`} 
+                    alt={item.title} 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-[10px] font-sans uppercase tracking-wider text-amber-900 font-semibold">{item.category}</span>
+                  <h4 className="text-sm font-serif font-medium text-stone-900 truncate">{item.title}</h4>
+                  <p className="text-xs font-sans text-stone-600">
+                    Valuation: <strong className="text-stone-900 font-semibold">${(item.currentBid || item.price || 0).toLocaleString()} USD</strong>
+                  </p>
+                </div>
+              </div>
+
+              {/* Notice Banner */}
+              {copiedSocialNotice && (
+                <div className="p-2.5 bg-amber-50 border border-amber-200 text-amber-950 text-xs font-sans flex items-center gap-2">
+                  <Check className="w-4 h-4 text-amber-800 flex-shrink-0" />
+                  <span>{copiedSocialNotice}</span>
+                </div>
+              )}
+
+              {/* Direct Link Copy Bar */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-sans uppercase tracking-[0.18em] font-semibold text-stone-600 flex items-center justify-between">
+                  <span>Direct Product Permalink</span>
+                  {copiedLink && (
+                    <span className="text-emerald-700 font-semibold flex items-center gap-1 normal-case tracking-normal text-xs">
+                      <Check className="w-3.5 h-3.5" /> Copied to clipboard!
+                    </span>
+                  )}
+                </label>
+                <div className="flex items-center border border-stone-300 bg-stone-50 focus-within:border-stone-900 focus-within:bg-white transition-colors">
+                  <input
+                    type="text"
+                    readOnly
+                    value={getDirectLink()}
+                    className="flex-1 bg-transparent px-3 py-2.5 text-xs font-mono text-stone-700 outline-none select-all"
+                  />
+                  <button
+                    onClick={handleCopyLink}
+                    className="px-4 py-2.5 bg-stone-900 hover:bg-black text-white text-xs font-sans font-medium uppercase tracking-wider flex items-center gap-1.5 transition-colors"
+                  >
+                    {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedLink ? 'Copied' : 'Copy'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Integrated Social Channels Grid */}
+              <div className="space-y-3 pt-2">
+                <span className="text-[10px] font-sans uppercase tracking-[0.18em] font-semibold text-stone-600">
+                  Integrated Social Platforms
+                </span>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {/* X / Twitter */}
+                  <button
+                    onClick={handleShareTwitter}
+                    className="flex flex-col items-center justify-center gap-1.5 p-3 border border-stone-200 hover:border-stone-900 bg-stone-50/60 hover:bg-stone-100 transition-colors group"
+                    title="Share on X (Twitter)"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      </svg>
+                    </div>
+                    <span className="text-[11px] font-sans font-medium text-stone-800">X / Twitter</span>
+                  </button>
+
+                  {/* WhatsApp */}
+                  <button
+                    onClick={handleShareWhatsApp}
+                    className="flex flex-col items-center justify-center gap-1.5 p-3 border border-stone-200 hover:border-emerald-600 bg-stone-50/60 hover:bg-emerald-50/40 transition-colors group"
+                    title="Share via WhatsApp"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-[#25D366] text-white flex items-center justify-center">
+                      <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                      </svg>
+                    </div>
+                    <span className="text-[11px] font-sans font-medium text-stone-800">WhatsApp</span>
+                  </button>
+
+                  {/* Facebook */}
+                  <button
+                    onClick={handleShareFacebook}
+                    className="flex flex-col items-center justify-center gap-1.5 p-3 border border-stone-200 hover:border-blue-600 bg-stone-50/60 hover:bg-blue-50/40 transition-colors group"
+                    title="Share on Facebook"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-[#1877F2] text-white flex items-center justify-center">
+                      <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                      </svg>
+                    </div>
+                    <span className="text-[11px] font-sans font-medium text-stone-800">Facebook</span>
+                  </button>
+
+                  {/* Pinterest */}
+                  <button
+                    onClick={handleSharePinterest}
+                    className="flex flex-col items-center justify-center gap-1.5 p-3 border border-stone-200 hover:border-red-600 bg-stone-50/60 hover:bg-red-50/40 transition-colors group"
+                    title="Pin to Pinterest"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-[#E60023] text-white flex items-center justify-center">
+                      <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                        <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146 1.124.347 2.317.535 3.554.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/>
+                      </svg>
+                    </div>
+                    <span className="text-[11px] font-sans font-medium text-stone-800">Pinterest</span>
+                  </button>
+
+                  {/* LinkedIn */}
+                  <button
+                    onClick={handleShareLinkedIn}
+                    className="flex flex-col items-center justify-center gap-1.5 p-3 border border-stone-200 hover:border-blue-700 bg-stone-50/60 hover:bg-blue-50/40 transition-colors group"
+                    title="Share on LinkedIn"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-[#0A66C2] text-white flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                      </svg>
+                    </div>
+                    <span className="text-[11px] font-sans font-medium text-stone-800">LinkedIn</span>
+                  </button>
+
+                  {/* Instagram with Caption Helper */}
+                  <button
+                    onClick={handleShareInstagram}
+                    className="flex flex-col items-center justify-center gap-1.5 p-3 border border-stone-200 hover:border-[#bc1888] bg-stone-50/60 hover:bg-pink-50/40 transition-colors group"
+                    title="Copy caption and share on Instagram"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] text-white flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                         <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                       </svg>
                     </div>
-                    <div className="text-left">
-                      <p className="text-xs font-black uppercase tracking-wider text-primary">Share to Instagram</p>
-                      <p className="text-[10px] text-ink/60">Copies caption + tags & opens app</p>
-                    </div>
-                  </div>
-                  <ArrowUpRight className="w-4 h-4 text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </button>
+                    <span className="text-[11px] font-sans font-medium text-stone-800">Instagram</span>
+                  </button>
 
-                {/* TikTok Option */}
-                <button
-                  onClick={handleShareTikTok}
-                  className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-black/5 hover:bg-black/10 border border-black/10 transition-all group cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center shadow-md">
-                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                  {/* TikTok with Hook Helper */}
+                  <button
+                    onClick={handleShareTikTok}
+                    className="flex flex-col items-center justify-center gap-1.5 p-3 border border-stone-200 hover:border-black bg-stone-50/60 hover:bg-stone-100 transition-colors group"
+                    title="Copy hook and share on TikTok"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center">
+                      <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                         <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z"/>
                       </svg>
                     </div>
-                    <div className="text-left">
-                      <p className="text-xs font-black uppercase tracking-wider text-primary">Share to TikTok</p>
-                      <p className="text-[10px] text-ink/60">Copies post hook & opens TikTok</p>
-                    </div>
-                  </div>
-                  <ArrowUpRight className="w-4 h-4 text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </button>
+                    <span className="text-[11px] font-sans font-medium text-stone-800">TikTok</span>
+                  </button>
 
-                {/* Copy Link Option */}
+                  {/* Native Device Share Sheet */}
+                  <button
+                    onClick={handleShareNative}
+                    className="flex flex-col items-center justify-center gap-1.5 p-3 border border-stone-200 hover:border-stone-900 bg-stone-50/60 hover:bg-stone-100 transition-colors group"
+                    title="Open native device share sheet"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-stone-800 text-white flex items-center justify-center">
+                      <Share2 className="w-4 h-4" />
+                    </div>
+                    <span className="text-[11px] font-sans font-medium text-stone-800">More Options</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="pt-3 border-t border-stone-200 flex items-center justify-between text-[11px] font-sans text-stone-500">
+                <button
+                  onClick={() => {
+                    setShowShareModal(false);
+                    setShowQrModal(true);
+                  }}
+                  className="flex items-center gap-1.5 text-amber-900 hover:text-amber-950 font-semibold uppercase tracking-wider transition-colors"
+                >
+                  <QrCode className="w-3.5 h-3.5" />
+                  <span>Scan Mobile QR</span>
+                </button>
+                <button
+                  onClick={() => setShowShareModal(false)}
+                  className="hover:text-stone-900 font-semibold uppercase tracking-wider transition-colors"
+                >
+                  Done
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* Archival Mobile QR Code Scanner Modal */}
+        {showQrModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[135] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+            onClick={() => setShowQrModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 15 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 15 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white border border-stone-300 max-w-md w-full shadow-2xl relative p-6 sm:p-8 space-y-6 text-stone-900"
+            >
+              {/* Header */}
+              <div className="flex items-start justify-between border-b border-stone-200 pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-700" />
+                    <span className="text-[10px] font-sans font-semibold uppercase tracking-[0.25em] text-amber-900">
+                      Mobile Provenance Scan
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-serif text-stone-900">
+                    Scan Lot QR Code
+                  </h3>
+                  <p className="text-xs font-serif italic text-stone-600">
+                    Open seamlessly on mobile camera or share with gallery visitors.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowQrModal(false)}
+                  className="p-1.5 hover:bg-stone-100 text-stone-500 hover:text-stone-950 transition-colors"
+                  aria-label="Close QR scanner dialog"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* QR Code Presentation Stage */}
+              <div className="flex flex-col items-center justify-center p-6 bg-[#faf8f5] border border-stone-200 text-center space-y-4">
+                <div className="relative p-3.5 bg-white border border-stone-300 shadow-sm flex items-center justify-center min-w-[220px] min-h-[220px]">
+                  {qrLoading ? (
+                    <div className="flex flex-col items-center justify-center gap-2 py-12 text-stone-400">
+                      <Loader2 className="w-6 h-6 animate-spin text-amber-900" />
+                      <span className="text-xs font-sans">Generating Archival Code...</span>
+                    </div>
+                  ) : qrDataUrl ? (
+                    <img 
+                      src={qrDataUrl} 
+                      alt={`QR Code for ${item.title}`} 
+                      className="w-52 h-52 sm:w-56 sm:h-56 object-contain"
+                    />
+                  ) : (
+                    <div className="text-xs text-red-600">Failed to render QR Code</div>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-[10px] font-sans font-semibold uppercase tracking-widest text-amber-900">
+                    Lot #{item.id.slice(0, 8).toUpperCase()}
+                  </span>
+                  <h4 className="text-sm font-serif font-medium text-stone-900 max-w-[280px] truncate">
+                    {item.title}
+                  </h4>
+                  <p className="text-xs font-sans text-stone-600">
+                    Valuation: <strong className="text-stone-900 font-semibold">${(item.currentBid || item.price || 0).toLocaleString()} USD</strong>
+                  </p>
+                </div>
+              </div>
+
+              {/* Scanning Guidance */}
+              <div className="flex items-start gap-3 p-3 bg-stone-50 border border-stone-200 text-xs font-sans text-stone-600">
+                <Smartphone className="w-4 h-4 text-amber-800 flex-shrink-0 mt-0.5" />
+                <p>
+                  Point your phone's native camera (iOS Camera or Android Lens) directly at this code to view this lot and submit bid paddles on mobile.
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  onClick={handleDownloadQr}
+                  disabled={!qrDataUrl}
+                  className="flex-1 py-2.5 px-3 bg-stone-900 hover:bg-black text-white text-xs font-sans font-medium uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer"
+                  title="Download high-resolution QR Code image (PNG)"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download PNG</span>
+                </button>
                 <button
                   onClick={handleCopyLink}
-                  className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white hover:bg-stone-50 border border-black/10 shadow-sm transition-all group cursor-pointer"
+                  className="py-2.5 px-4 border border-stone-300 hover:border-stone-900 bg-white text-stone-900 text-xs font-sans font-medium uppercase tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer"
+                  title="Copy direct permalink"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-stone-100 text-primary flex items-center justify-center">
-                      {copiedLink ? <Check className="w-5 h-5 text-emerald-600" /> : <Copy className="w-5 h-5 text-ink/80" />}
-                    </div>
-                    <div className="text-left">
-                      <p className="text-xs font-black uppercase tracking-wider text-primary">
-                        {copiedLink ? 'Link Copied to Clipboard!' : 'Copy Direct Link'}
-                      </p>
-                      <p className="text-[10px] text-ink/60">Direct archival permalink</p>
-                    </div>
-                  </div>
-                  {copiedLink && <span className="text-[10px] font-black uppercase text-emerald-600 tracking-wider">Copied</span>}
+                  {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedLink ? 'Copied' : 'Copy Link'}</span>
                 </button>
               </div>
             </motion.div>
@@ -2939,13 +3666,21 @@ const ItemDetail = ({
       </AnimatePresence>
 
       {/* Mobile Sticky Action Bar - Amazon Style */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[110] bg-white/95 backdrop-blur-xl border-t border-black/5 p-4 flex items-center gap-4 safe-area-pb shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-[110] bg-white/95 backdrop-blur-xl border-t border-black/5 p-4 flex items-center gap-3 safe-area-pb shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
         <div className="flex-1">
           <p className="text-[8px] font-black text-ink/40 uppercase tracking-widest">Current Valuation</p>
           <p className="text-xl font-serif font-black text-accent leading-none">
             ${(item.currentBid || item.price || 0).toLocaleString()}
           </p>
         </div>
+        <button
+          onClick={() => setShowShareModal(true)}
+          className="w-12 h-12 flex-shrink-0 flex items-center justify-center border border-stone-300 bg-white hover:bg-stone-100 text-stone-800 transition-colors shadow-sm"
+          title="Share lot"
+          aria-label="Share lot"
+        >
+          <Share2 className="w-5 h-5 text-amber-900" />
+        </button>
         <button 
           onClick={() => {
             if (item.listingType === 'auction') {
@@ -2956,9 +3691,9 @@ const ItemDetail = ({
               setShowCheckout(true);
             }
           }}
-          className="bg-primary text-white px-8 py-4 rounded-xl text-xs font-black uppercase tracking-[0.3em] shadow-xl active:scale-95 transition-all"
+          className="bg-primary text-white px-6 sm:px-8 py-3.5 rounded-none text-xs font-sans font-semibold uppercase tracking-[0.2em] shadow-md active:scale-95 transition-all"
         >
-          {item.listingType === 'auction' ? 'Place Valuation' : 'Acquire Now'}
+          {item.listingType === 'auction' ? 'Place Bid' : 'Acquire Now'}
         </button>
       </div>
 
@@ -3113,27 +3848,46 @@ const ItemDetail = ({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="fixed inset-0 z-[120] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-4 md:p-8"
+                  className="fixed inset-0 z-[120] bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-6"
                   onClick={() => setIsZoomOpen(false)}
                 >
-                  <button
-                    onClick={() => setIsZoomOpen(false)}
-                    className="absolute top-6 right-6 w-12 h-12 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-all cursor-pointer"
-                    aria-label="Close high-res view"
+                  <div 
+                    className="relative max-w-3xl w-full max-h-[85vh] bg-[#1a1816] border border-stone-700/80 p-4 sm:p-6 shadow-2xl flex flex-col items-center justify-center"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <X className="w-6 h-6" />
-                  </button>
-                  <div className="max-w-4xl max-h-[82vh] flex items-center justify-center p-2" onClick={(e) => e.stopPropagation()}>
-                    <img
-                      src={selectedImage}
-                      alt={item.title}
-                      className="max-w-full max-h-[82vh] object-contain rounded-xl shadow-2xl"
-                      referrerPolicy="no-referrer"
-                    />
+                    {/* Top Bar with Title and Close Button */}
+                    <div className="w-full flex items-center justify-between pb-3 mb-3 border-b border-stone-800 text-stone-300">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-amber-500" />
+                        <span className="text-xs font-sans uppercase tracking-[0.18em] text-stone-200 truncate max-w-[280px] sm:max-w-md">
+                          {item.title}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => setIsZoomOpen(false)}
+                        className="p-1.5 hover:bg-stone-800 text-stone-400 hover:text-white rounded transition-colors"
+                        aria-label="Close high-res view"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    {/* Image Stage - strictly bounded so it fits comfortably within viewport without clipping */}
+                    <div className="relative w-full h-[52vh] sm:h-[60vh] flex items-center justify-center bg-[#11100e] overflow-hidden p-2">
+                      <img
+                        src={selectedImage}
+                        alt={item.title}
+                        className="max-w-full max-h-full w-auto h-auto object-contain filter drop-shadow-xl"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+
+                    {/* Bottom Metadata & Provenance Caption */}
+                    <div className="w-full pt-3 mt-3 border-t border-stone-800 flex items-center justify-between text-[11px] font-sans text-stone-400">
+                      <span>Valuation: <strong className="text-stone-100">${(item.price || item.currentBid || 0).toLocaleString()}</strong></span>
+                      <span className="italic font-serif text-stone-400">Strawboss Archival Register • Verified Lot</span>
+                    </div>
                   </div>
-                  <p className="text-white/70 text-xs font-serif mt-4 text-center">
-                    {item.title} • Strawboss Archival Master View
-                  </p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -3148,14 +3902,24 @@ const ItemDetail = ({
                   <h1 className="text-2xl md:text-3xl font-serif font-black text-primary tracking-tighter leading-tight uppercase">
                     {item.title}
                   </h1>
-                  <button
-                    onClick={handleShare}
-                    className="flex-shrink-0 flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/90 hover:bg-white border border-black/10 shadow-sm text-xs font-black uppercase tracking-wider text-primary hover:text-accent transition-all cursor-pointer"
-                    title="Share item on Instagram, TikTok, or copy link"
-                  >
-                    <Share2 className="w-4 h-4 text-accent" />
-                    <span className="hidden sm:inline">Share</span>
-                  </button>
+                  <div className="flex-shrink-0 flex items-center gap-2">
+                    <button
+                      onClick={() => setShowQrModal(true)}
+                      className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-stone-50 border border-stone-300 hover:border-stone-900 text-stone-900 text-xs font-sans font-semibold uppercase tracking-wider transition-all cursor-pointer shadow-sm"
+                      title="Scan QR Code to open lot directly on mobile device"
+                    >
+                      <QrCode className="w-3.5 h-3.5 text-amber-800" />
+                      <span className="hidden sm:inline">QR Code</span>
+                    </button>
+                    <button
+                      onClick={handleShare}
+                      className="flex items-center gap-2 px-3.5 py-2 bg-white hover:bg-stone-50 border border-stone-300 hover:border-stone-900 text-stone-900 text-xs font-sans font-semibold uppercase tracking-wider transition-all cursor-pointer shadow-sm"
+                      title="Share item via direct link or integrated social platforms"
+                    >
+                      <Share2 className="w-3.5 h-3.5 text-amber-800" />
+                      <span className="hidden sm:inline">Share</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -3271,6 +4035,44 @@ const ItemDetail = ({
                       </div>
                     </div>
                   )}
+
+                  {/* Share, QR Code & Direct Link Action Strip */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-stone-200/90 text-xs font-sans text-stone-600">
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => setShowQrModal(true)}
+                        className="inline-flex items-center gap-1.5 hover:text-stone-950 font-medium transition-colors cursor-pointer"
+                        title="Scan QR Code to open on mobile"
+                      >
+                        <QrCode className="w-3.5 h-3.5 text-amber-800" />
+                        <span>Scan Mobile QR</span>
+                      </button>
+                      <button
+                        onClick={handleShare}
+                        className="inline-flex items-center gap-1.5 hover:text-stone-950 font-medium transition-colors cursor-pointer"
+                        title="Share on social media"
+                      >
+                        <Share2 className="w-3.5 h-3.5 text-amber-800" />
+                        <span>Share</span>
+                      </button>
+                    </div>
+                    <button
+                      onClick={handleCopyLink}
+                      className="inline-flex items-center gap-1.5 hover:text-stone-950 font-medium transition-colors cursor-pointer"
+                    >
+                      {copiedLink ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          <span className="text-emerald-700 font-semibold">Direct Link Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5 text-stone-500" />
+                          <span>Copy Direct Link</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -5106,6 +5908,40 @@ export default function App() {
     const interval = setInterval(fetchItems, 600000);
     return () => clearInterval(interval);
   }, []);
+
+  // Deep-link support: auto-open item when loaded from a shared direct link (?lot=<id> or ?item=<id>)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const lotId = params.get('lot') || params.get('item');
+    if (lotId && items.length > 0) {
+      const match = items.find(i => i.id === lotId);
+      if (match) {
+        setSelectedItem(match);
+        setView('detail');
+      }
+    }
+  }, [items]);
+
+  // Keep URL in sync with active product so direct link copying and sharing is seamless
+  useEffect(() => {
+    try {
+      const url = new URL(window.location.href);
+      if (view === 'detail' && selectedItem) {
+        if (url.searchParams.get('lot') !== selectedItem.id) {
+          url.searchParams.set('lot', selectedItem.id);
+          window.history.replaceState(null, '', url.toString());
+        }
+      } else if (view !== 'detail') {
+        if (url.searchParams.has('lot') || url.searchParams.has('item')) {
+          url.searchParams.delete('lot');
+          url.searchParams.delete('item');
+          window.history.replaceState(null, '', url.toString());
+        }
+      }
+    } catch {
+      // safe fallback for restricted environments
+    }
+  }, [view, selectedItem]);
 
   useEffect(() => {
     if (selectedItem) {
